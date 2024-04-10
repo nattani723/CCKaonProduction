@@ -16,6 +16,8 @@
 #include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
 #include "ubana/HyperonProduction/Headers/LLRPID_correction_lookup.h"
 #include "TVector3.h"
+#include <TH3.h>
+#include <TFile.h>
 
 namespace hyperon {
 
@@ -70,6 +72,7 @@ namespace hyperon {
          void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
+         void GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const;
          PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
                
          double PlaneWeight(TVector3 dir,int i_pl);
@@ -79,16 +82,25 @@ namespace hyperon {
 
       private:
 
+         enum Planes {kPlane0,kPlane1,kPlane2,kInvalid};
+
          searchingfornues::LLRPID llr_pid_calculator;
          searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
          searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
          searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
          searchingfornues::CorrectionLookUpParameters correction_parameters;
-         
 
          // Miniumum value of sin2(angle between track and wires)
          double TophatThresh = 0.175;
          double ResRangeCutoff=5; 
+
+         const std::vector<int> pdg_v = {3222,3112,321,2212,13,211};
+         std::vector<TH3D*> h_dEdx_Reference_Plane0;
+         std::vector<TH3D*> h_dEdx_Reference_Plane1;
+         std::vector<TH3D*> h_dEdx_Reference_Plane2;
+
+         void LoadGenericLLRPID();
+
    };
 }
 

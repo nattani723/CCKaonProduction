@@ -10,8 +10,8 @@ const double dEdx_binning[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
 
 const int ResRange_bins = 20;
 const double ResRange_binning[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-const int Pitch_bins = 4;
-const double Pitch_binning[] = {0.0,5.0,10.0,20.0,50.0};
+const int Pitch_bins = 9;
+const double Pitch_binning[] = {0.0,0.5,1.0,1.5,2.0,2.5,5.0,10.0,20.0,50.0};
 
 const std::vector<int> pdg_v = {3222,3112,321,2212,13,211};
 const std::vector<std::string> particle_v = {"SigmaP","SigmaM","Kaon","Proton","Muon","Pion"};
@@ -30,7 +30,7 @@ void MakeReferenceData(){
   } 
 
   // Load the trees containing the data
-  TFile* f_in = TFile::Open("/exp/uboone/data/users/cthorpe/ChargedSigmas/SignalReco2/dEdxTrees.root");
+  TFile* f_in = TFile::Open("/exp/uboone/app/users/cthorpe/HyperonCode_v08_00_00_78/srcs/ubana/ubana/HyperonProduction/Data/dEdx_Trees.root");
   TTree* t_in = static_cast<TTree*>(f_in->Get("ana/OutputTree"));
   vector<int>     *TrackTruePDG;
   vector<float>   *TrackLength;

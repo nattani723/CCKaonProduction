@@ -3,6 +3,7 @@ BEGIN_PROLOG
 analyseEvents:
 
 {
+
 module_type: HyperonNtuples
 Debug: false
 IsData: false
@@ -13,34 +14,37 @@ GetRecoInfo: true
 
 # GeneratorTruth submodule config
 Generator: {
-GeneratorModuleLabel: "generator"
+  GeneratorModuleLabel: "generator"
 }
 
 # G4Truth submodule config
 Geant4: {
-GeneratorModuleLabel: "generator"
-G4ModuleLabel: "largeant"
-NeutronScatterProtonThresh: 0.400
-NeutronScatterPionThresh: 0.100
-DecayProtonThresh: 0.0
-DecayPionThresh: 0.0
+  GeneratorModuleLabel: "generator"
+  G4ModuleLabel: "largeant"
+  NeutronScatterProtonThresh: 0.400
+  NeutronScatterPionThresh: 0.100
+  DecayProtonThresh: 0.0
+  DecayPionThresh: 0.0
 }
 
 # Reco submodule config
 Reco: {
-GeneratorModuleLabel: "generator"
-G4ModuleLabel: "largeant"
-PFParticleModuleLabel: "pandora"
-TrackModuleLabel: "pandora"
-VertexModuleLabel: "pandora"
-ShowerModuleLabel: "pandora"
-MetadataModuleLabel: "pandora" 
-PIDModuleLabel: "pandorapid"
-CaloModuleLabel: "pandoracali"
-HitModuleLabel: "gaushit"
-TrackHitAssnLabel: "pandora" 
-ShowerHitAssnLabel: "pandora"
-HitTruthAssnLabel: "gaushitTruthMatch"
+  GeneratorModuleLabel: "generator"
+  G4ModuleLabel: "largeant"
+  PFParticleModuleLabel: "pandora"
+  TrackModuleLabel: "pandora"
+  VertexModuleLabel: "pandora"
+  ShowerModuleLabel: "pandora"
+  MetadataModuleLabel: "pandora" 
+  PIDModuleLabel: "pandorapid"
+  CaloModuleLabel: "pandoracali"
+  HitModuleLabel: "gaushit"
+  TrackHitAssnLabel: "pandora" 
+  ShowerHitAssnLabel: "pandora"
+  HitTruthAssnLabel: "gaushitTruthMatch"
+  PIDSettings: {
+    PIDReferenceHists: "${UBANA_DIR}/HyperonProduction/Data/dEdx_Reference.root"
+  }
 }
 
 # Connectedness test config

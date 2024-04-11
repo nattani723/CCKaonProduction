@@ -7,7 +7,9 @@ using namespace hyperon;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PIDManager::PIDManager(){
+PIDManager::PIDManager(const fhicl::ParameterSet& p) :
+PIDReferenceHists(p.get<std::string>("PIDReferenceHists",""))
+{
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
    llr_pid_calculator.set_par_binning(0, protonmuon_parameters.parameters_edges_pl_0);
@@ -38,14 +40,14 @@ PIDManager::PIDManager(){
    llr_pid_calculator_kaon.set_dedx_binning(2, kaonproton_parameters.dedx_edges_pl_2);
    llr_pid_calculator_kaon.set_par_binning(2, kaonproton_parameters.parameters_edges_pl_2);
    llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
-
-   LoadGenericLLRPID();   
+     
+   if(PIDReferenceHists != "") LoadGenericLLRPID();   
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo){
+double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo) const {
 
    double totalE=0;
    double totalX=0;
@@ -70,7 +72,7 @@ double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store){
+void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store) const {
 
    double TotaldEdX=0;
    double TotalWeight=0;
@@ -88,6 +90,7 @@ void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art
 
       double thisPlaneWeight = PlaneWeight(track,plane);
 
+      /*
       if(plane == 0){
          store.Weight_Plane0 = thisPlaneWeight;       
          store.MeandEdX_Plane0 = dEdX;
@@ -112,6 +115,7 @@ void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art
          store.Pitch_Plane2 = calo_v.at(i_pl)->TrkPitchVec();
          store.dEdX_Corrected_Plane2 = llr_pid_calculator.correct_many_hits_one_plane(calo_v.at(i_pl),*track,true,true);
       }
+      */
 
       TotaldEdX += dEdX*thisPlaneWeight;
       TotalWeight += thisPlaneWeight;
@@ -187,7 +191,7 @@ void PIDManager::LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store){
+void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store) const {
 
    for(size_t i_algscore=0;i_algscore<algscores_v.size();i_algscore++){
       anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
@@ -210,15 +214,16 @@ PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<a
    ThreePlaneMeandEdX(track,calo_v,theStore);
    LLRPID(calo_v,theStore);
    BraggPID(track,algscores_v,theStore);
-   GetGenericLLRPID(calo_v,std::make_pair(13,2212));
-
+   theStore.LLR_SigmaKaon = GetGenericLLRPID(calo_v,std::make_pair(3112,321));
+   theStore.LLR_SigmaProton = GetGenericLLRPID(calo_v,std::make_pair(3112,2212));
+   theStore.LLR_SigmaMuon = GetGenericLLRPID(calo_v,std::make_pair(3112,13));
 
    return theStore;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::PlaneWeight(TVector3 dir,int i_pl){
+double PIDManager::PlaneWeight(TVector3 dir,int i_pl) const {
 
    TVector3 trackvec(0, dir.Y(), dir.Z());
    trackvec = trackvec.Unit();
@@ -241,7 +246,7 @@ double PIDManager::PlaneWeight(TVector3 dir,int i_pl){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
+double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl) const {
 
    TVector3 trackdir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
    return PlaneWeight(trackdir,i_pl);
@@ -252,8 +257,7 @@ double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
 //void PIDManager::LoadGenericLLRPID(const fhicl::ParameterSet& p){
 void PIDManager::LoadGenericLLRPID(){
 
-  //TFile* f = TFile::Open((p.get<std::string>("PIDReferenceHists")).c_str());
-  TFile* f = TFile::Open("/exp/uboone/app/users/cthorpe/HyperonCode_v08_00_00_78/srcs/ubana/ubana/HyperonProduction/Data/dEdx_Reference.root");
+  TFile* f = TFile::Open(PIDReferenceHists.c_str());
 
   for(size_t i_pdg=0;i_pdg<pdg_v.size();i_pdg++){
      const std::string pdg = std::to_string(pdg_v.at(i_pdg));
@@ -264,11 +268,16 @@ void PIDManager::LoadGenericLLRPID(){
  
   f->Close();
 
+  std::cout << "PIDManager: Loaded PID reference hists from " << PIDReferenceHists << std::endl;
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const {
+double PIDManager::GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const {
+
+   if(PIDReferenceHists == "")
+     throw cet::exception("PIDManager:") << "Generic LLR PID reference hists not loaded" << std::endl;
 
    int pdg_index_first = -1;
    int pdg_index_second = -1;
@@ -311,11 +320,14 @@ void PIDManager::GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_
         int bin_z = h_hyp_first->GetZaxis()->FindBin(pitch.at(i_p));
         double l_first = h_hyp_first->GetBinContent(bin_x,bin_y,bin_z);
         double l_second = h_hyp_second->GetBinContent(bin_x,bin_y,bin_z);
+        std::cout << l_first <<  "  " << l_second << std::endl;
         if(l_first > 0 && l_second > 0) llr += log(l_first) - log(l_second);
       } 
     }
     
-   std::cout << "Score: " << 2/3.1415*atan(llr) << std::endl;
+   //std::cout << "Score: " << 2/3.1415*atan(llr) << std::endl;
+
+  return 2.0/3.1415*atan(llr);
 
 }
 

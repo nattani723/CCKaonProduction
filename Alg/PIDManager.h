@@ -46,6 +46,7 @@ namespace hyperon {
       double Bragg_Kaon_Plane2;    
       double Bragg_Kaon_3Plane;
 
+      /*
       std::vector<float> dEdX_Plane0;
       std::vector<float> ResidualRange_Plane0;
       std::vector<float> Pitch_Plane0;
@@ -55,10 +56,15 @@ namespace hyperon {
       std::vector<float> dEdX_Plane2;
       std::vector<float> ResidualRange_Plane2;
       std::vector<float> Pitch_Plane2;
+      */
 
       std::vector<float> dEdX_Corrected_Plane0;
       std::vector<float> dEdX_Corrected_Plane1;
       std::vector<float> dEdX_Corrected_Plane2;
+
+      double LLR_SigmaKaon;
+      double LLR_SigmaProton;
+      double LLR_SigmaMuon;
 
    };
 
@@ -66,17 +72,17 @@ namespace hyperon {
 
       public: 
 
-         PIDManager();
+         PIDManager(const fhicl::ParameterSet& p);
 
-         double GetMeandEdX(art::Ptr<anab::Calorimetry> calo);
-         void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
+         double GetMeandEdX(art::Ptr<anab::Calorimetry> calo) const;
+         void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store) const;
          void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
-         void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
-         void GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const;
+         void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store) const;
+         double GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const;
          PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
                
-         double PlaneWeight(TVector3 dir,int i_pl);
-         double PlaneWeight(art::Ptr<recob::Track> track,int i_pl);
+         double PlaneWeight(TVector3 dir,int i_pl) const ;
+         double PlaneWeight(art::Ptr<recob::Track> track,int i_pl) const;
 
          void SetTophatThresh(double thresh){ TophatThresh = thresh; }
 
@@ -94,6 +100,7 @@ namespace hyperon {
          double TophatThresh = 0.175;
          double ResRangeCutoff=5; 
 
+         const std::string PIDReferenceHists;
          const std::vector<int> pdg_v = {3222,3112,321,2212,13,211};
          std::vector<TH3D*> h_dEdx_Reference_Plane0;
          std::vector<TH3D*> h_dEdx_Reference_Plane1;

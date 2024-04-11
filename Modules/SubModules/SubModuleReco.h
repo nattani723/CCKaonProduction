@@ -68,7 +68,7 @@ class SubModuleReco {
       SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                         string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                        string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
+                        string g4label,fhicl::ParameterSet pidsettings,bool dogetpids,bool includecosmics,bool particlegunmode=false);
 
       SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
 
@@ -78,8 +78,6 @@ class SubModuleReco {
 
       RecoData GetInfo();
       void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
-
-     
 
    private:
 

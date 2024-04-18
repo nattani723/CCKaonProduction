@@ -81,6 +81,7 @@ class hyperon::LLRPIDTrainer : public art::EDAnalyzer {
     TTree * OutputTree;
 
     std::vector<int> t_TrackTruePDG;
+    std::vector<int> t_TrackTrueMomentum;
     std::vector<float> t_TrackLength;
     std::vector<float> t_TrackAngleTrueReco; // Angle between true and reco track directions    
     std::vector<std::vector<float>> t_ResidualRange_Plane0;
@@ -114,6 +115,7 @@ void hyperon::LLRPIDTrainer::analyze(art::Event const& e)
   //begin by resetting everything
 
   t_TrackTruePDG.clear();
+  t_TrackTrueMomentum.clear();
   t_TrackLength.clear();
   t_TrackAngleTrueReco.clear();
   t_ResidualRange_Plane0.clear();
@@ -201,6 +203,7 @@ void hyperon::LLRPIDTrainer::analyze(art::Event const& e)
     if(matchedParticle == NULL) continue;
 
     t_TrackTruePDG.push_back(matchedParticle->PdgCode());
+    t_TrackTrueMomentum.push_back(TVector3(matchedParticle->Px(),matchedParticle->Py(),matchedParticle->Pz()).Mag());
     t_TrackLength.push_back(track->Length());
 
     // Calculate the angle between the true and reconstructed directions - check if particle is reco'd in the

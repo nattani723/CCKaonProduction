@@ -124,6 +124,8 @@ class SubModuleReco {
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
 
+      std::vector<std::pair<int,double>> EnhancedTruthMatch(const art::Ptr<recob::Track> &trk);
+
       bool IsData;
       bool DoGetPIDs=true;
       double ResRangeCutoff=5; 

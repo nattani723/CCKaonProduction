@@ -47,12 +47,8 @@ art_make(
 		${ROOT_BASIC_LIB_LIST}
                 ${ROOT_GENVECTOR}
                 uboonecode_uboone_EventConnectedness
-                uboonecode_uboone_HyperonProduction_Algorithms
-                uboonecode_uboone_HyperonProduction_SubModules
-                uboonecode_uboone_HyperonProduction_Tools
-                
-                CCKaonHeaders
-
+                uboonecode_uboone_CCKaonProduction_Algorithms
+                uboonecode_uboone_CCKaonProduction_SubModules
 )
 
 install_headers()

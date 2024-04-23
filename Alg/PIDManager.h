@@ -10,14 +10,12 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
 #include "ubana/ParticleID/Algorithms/uB_PlaneIDBitsetHelperFunctions.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_correction_lookup.h"
+#include "ubana/CCKaonProduction/Headers/LLR_PID.h"
+#include "ubana/CCKaonProduction/Headers/LLRPID_proton_muon_lookup.h"
+#include "ubana/CCKaonProduction/Headers/LLR_PID_K.h"
+#include "ubana/CCKaonProduction/Headers/LLRPID_kaon_proton_lookup.h"
+#include "ubana/CCKaonProduction/Headers/LLRPID_correction_lookup.h"
 #include "TVector3.h"
-#include <TH3.h>
-#include <TFile.h>
 
 namespace hyperon {
 
@@ -46,7 +44,6 @@ namespace hyperon {
       double Bragg_Kaon_Plane2;    
       double Bragg_Kaon_3Plane;
 
-      /*
       std::vector<float> dEdX_Plane0;
       std::vector<float> ResidualRange_Plane0;
       std::vector<float> Pitch_Plane0;
@@ -56,15 +53,10 @@ namespace hyperon {
       std::vector<float> dEdX_Plane2;
       std::vector<float> ResidualRange_Plane2;
       std::vector<float> Pitch_Plane2;
-      */
 
       std::vector<float> dEdX_Corrected_Plane0;
       std::vector<float> dEdX_Corrected_Plane1;
       std::vector<float> dEdX_Corrected_Plane2;
-
-      double LLR_SigmaKaon;
-      double LLR_SigmaProton;
-      double LLR_SigmaMuon;
 
    };
 
@@ -72,42 +64,31 @@ namespace hyperon {
 
       public: 
 
-         PIDManager(const fhicl::ParameterSet& p);
+         PIDManager();
 
-         double GetMeandEdX(art::Ptr<anab::Calorimetry> calo) const;
-         void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store) const;
+         double GetMeandEdX(art::Ptr<anab::Calorimetry> calo);
+         void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
-         void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store) const;
-         double GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const;
+         void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
          PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
                
-         double PlaneWeight(TVector3 dir,int i_pl) const ;
-         double PlaneWeight(art::Ptr<recob::Track> track,int i_pl) const;
+         double PlaneWeight(TVector3 dir,int i_pl);
+         double PlaneWeight(art::Ptr<recob::Track> track,int i_pl);
 
          void SetTophatThresh(double thresh){ TophatThresh = thresh; }
 
       private:
-
-         enum Planes {kPlane0,kPlane1,kPlane2,kInvalid};
 
          searchingfornues::LLRPID llr_pid_calculator;
          searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
          searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
          searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
          searchingfornues::CorrectionLookUpParameters correction_parameters;
+         
 
          // Miniumum value of sin2(angle between track and wires)
          double TophatThresh = 0.175;
          double ResRangeCutoff=5; 
-
-         const std::string PIDReferenceHists;
-         const std::vector<int> pdg_v = {3222,3112,321,2212,13,211};
-         std::vector<TH3D*> h_dEdx_Reference_Plane0;
-         std::vector<TH3D*> h_dEdx_Reference_Plane1;
-         std::vector<TH3D*> h_dEdx_Reference_Plane2;
-
-         void LoadGenericLLRPID();
-
    };
 }
 

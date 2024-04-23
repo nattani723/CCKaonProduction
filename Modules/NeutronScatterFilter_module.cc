@@ -21,8 +21,8 @@
 
 #include <memory>
 
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleG4Truth.h"
 
 namespace hyperon {
    class NeutronScatterFilter;

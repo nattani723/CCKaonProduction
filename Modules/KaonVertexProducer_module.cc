@@ -32,7 +32,7 @@
 #include "larevt/SpaceChargeServices/SpaceChargeService.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleReco.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleReco.h"
 
 #include <memory>
 

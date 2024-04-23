@@ -13,7 +13,7 @@
 
 #include "lardataobj/RecoBase/Wire.h"
 
-#include "ubana/HyperonProduction/Connectedness/Alg/ClusterBuilder.h"
+#include "ubana/CCKaonProduction/Connectedness/Alg/ClusterBuilder.h"
 #include "Position_To_Wire.h"
 
 #include "TVector3.h"

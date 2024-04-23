@@ -23,16 +23,16 @@
 #include "lardataobj/AnalysisBase/Calorimetry.h"
 #include "larevt/SpaceChargeServices/SpaceChargeService.h"
 
-#include "ubana/HyperonProduction/Headers/ParticleTypes.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
-#include "ubana/HyperonProduction/Objects/RecoParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
-#include "ubana/HyperonProduction/Alg/PIDManager.h"
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
-#include "ubana/HyperonProduction/Alg/BDTHandle.h"
+#include "ubana/CCKaonProduction/Headers/ParticleTypes.h"
+#include "ubana/CCKaonProduction/Headers/LLR_PID.h"
+#include "ubana/CCKaonProduction/Headers/LLRPID_proton_muon_lookup.h"
+#include "ubana/CCKaonProduction/Headers/LLR_PID_K.h"
+#include "ubana/CCKaonProduction/Headers/LLRPID_kaon_proton_lookup.h"
+#include "ubana/CCKaonProduction/Objects/RecoParticle.h"
+#include "ubana/CCKaonProduction/Objects/Helpers.h"
+#include "ubana/CCKaonProduction/Alg/PIDManager.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleG4Truth.h"
+#include "ubana/CCKaonProduction/Alg/BDTHandle.h"
 
 #include "TVector3.h"
 
@@ -68,7 +68,7 @@ class SubModuleReco {
       SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                         string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                        string g4label,fhicl::ParameterSet pidsettings,bool dogetpids,bool includecosmics,bool particlegunmode=false);
+                        string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
 
       SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
 
@@ -78,6 +78,8 @@ class SubModuleReco {
 
       RecoData GetInfo();
       void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
+
+     
 
    private:
 
@@ -123,8 +125,6 @@ class SubModuleReco {
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
-
-      std::vector<std::pair<int,double>> EnhancedTruthMatch(const art::Ptr<recob::Track> &trk);
 
       bool IsData;
       bool DoGetPIDs=true;

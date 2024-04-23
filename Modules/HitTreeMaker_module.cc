@@ -48,7 +48,7 @@
 #include "TVector3.h"
 
 // Local includes
-#include "ubana/HyperonProduction/Alg/Position_To_Wire.h"
+#include "ubana/CCKaonProduction/Alg/Position_To_Wire.h"
 
 namespace hyperon {
    class HitTreeMaker;

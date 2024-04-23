@@ -1,7 +1,7 @@
 #ifndef _BDTHandle_cxx_
 #define _BDTHandle_cxx_
 
-#include "ubana/HyperonProduction/Alg/BDTHandle.h"
+#include "ubana/CCKaonProduction/Alg/BDTHandle.h"
 
 using namespace hyperon;
 

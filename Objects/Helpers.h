@@ -2,9 +2,9 @@
 #define _Helpers_h_
 
 //local includes
-#include "ubana/HyperonProduction/Objects/SimParticle.h"
-#include "ubana/HyperonProduction/Objects/RecoParticle.h"
-#include "ubana/HyperonProduction/Headers/TrackWiggliness.h"
+#include "ubana/CCKaonProduction/Objects/SimParticle.h"
+#include "ubana/CCKaonProduction/Objects/RecoParticle.h"
+#include "ubana/CCKaonProduction/Headers/TrackWiggliness.h"
 
 //larsoft objects
 #include "canvas/Persistency/Common/FindManyP.h"

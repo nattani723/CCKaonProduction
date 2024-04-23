@@ -1,6 +1,6 @@
 art_make( 
 
-      LIBRARY_NAME     uboonecode_uboone_HyperonProduction_SubModules
+      LIBRARY_NAME     uboonecode_uboone_CCKaonProduction_SubModules
 
       LIB_LIBRARIES
       larcorealg_Geometry
@@ -39,7 +39,7 @@ art_make(
       ${ROOT_XMLIO}
       ${ROOT_GDML}
       ${ROOT_BASIC_LIB_LIST}
-      uboonecode_uboone_HyperonProduction_Algorithms
+      uboonecode_uboone_CCKaonProduction_Algorithms
 )
 
 install_headers()

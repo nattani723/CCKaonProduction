@@ -36,17 +36,17 @@
 //local includes
 
 //objects and helpers
-#include "ubana/HyperonProduction/Objects/SimParticle.h"
-#include "ubana/HyperonProduction/Objects/RecoParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
+#include "ubana/CCKaonProduction/Objects/SimParticle.h"
+#include "ubana/CCKaonProduction/Objects/RecoParticle.h"
+#include "ubana/CCKaonProduction/Objects/Helpers.h"
 
 //algorithms
-#include "ubana/HyperonProduction/Alg/ConnectednessHelper.h"
+#include "ubana/CCKaonProduction/Alg/ConnectednessHelper.h"
 
 //submodules
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleReco.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleG4Truth.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleReco.h"
 
 namespace hyperon {
    class HyperonNtuples;

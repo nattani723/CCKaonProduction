@@ -37,20 +37,13 @@ double TrackLength=0;
 double TrackDirectionX=0,TrackDirectionY=0,TrackDirectionZ=0;
 double TrackStartX=0,TrackStartY=0,TrackStartZ=0;
 double TrackEndX=0,TrackEndY=0,TrackEndZ=0;
-
-// Track PID Variables
 double TrackPID; // 3 plane PID score
 double MeandEdX_Plane0,MeandEdX_Plane1,MeandEdX_Plane2,MeandEdX_ThreePlane; // Mean dE/dX scores
 double Track_LLR_PID; // LLR PID
 double Track_LLR_PID_Kaon; // LLR PID with Kaon hypothesis
 double Track_LLR_PID_Kaon_Partial; // LLR PID with Kaon hypothesis using last 5cm of track
 double Track_Bragg_PID_Kaon;
-double Track_LLR_PID_SigmaKaon,Track_LLR_PID_SigmaProton,Track_LLR_PID_SigmaMuon;
-
-// Track Momentum estimators
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
-
-// Misc track variables
 double TrackWiggliness;
 
 // Truth info

@@ -1,15 +1,13 @@
 #ifndef _PIDManager_cxx_
 #define _PIDManager_cxx_
 
-#include "ubana/HyperonProduction/Alg/PIDManager.h"
+#include "ubana/CCKaonProduction/Alg/PIDManager.h"
 
 using namespace hyperon;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PIDManager::PIDManager(const fhicl::ParameterSet& p) :
-PIDReferenceHists(p.get<std::string>("PIDReferenceHists",""))
-{
+PIDManager::PIDManager(){
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
    llr_pid_calculator.set_par_binning(0, protonmuon_parameters.parameters_edges_pl_0);
@@ -40,14 +38,12 @@ PIDReferenceHists(p.get<std::string>("PIDReferenceHists",""))
    llr_pid_calculator_kaon.set_dedx_binning(2, kaonproton_parameters.dedx_edges_pl_2);
    llr_pid_calculator_kaon.set_par_binning(2, kaonproton_parameters.parameters_edges_pl_2);
    llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
-     
-   if(PIDReferenceHists != "") LoadGenericLLRPID();   
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo) const {
+double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo){
 
    double totalE=0;
    double totalX=0;
@@ -72,7 +68,7 @@ double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo) const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store) const {
+void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store){
 
    double TotaldEdX=0;
    double TotalWeight=0;
@@ -90,7 +86,6 @@ void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art
 
       double thisPlaneWeight = PlaneWeight(track,plane);
 
-      /*
       if(plane == 0){
          store.Weight_Plane0 = thisPlaneWeight;       
          store.MeandEdX_Plane0 = dEdX;
@@ -115,7 +110,6 @@ void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art
          store.Pitch_Plane2 = calo_v.at(i_pl)->TrkPitchVec();
          store.dEdX_Corrected_Plane2 = llr_pid_calculator.correct_many_hits_one_plane(calo_v.at(i_pl),*track,true,true);
       }
-      */
 
       TotaldEdX += dEdX*thisPlaneWeight;
       TotalWeight += thisPlaneWeight;
@@ -191,7 +185,7 @@ void PIDManager::LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store) const {
+void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store){
 
    for(size_t i_algscore=0;i_algscore<algscores_v.size();i_algscore++){
       anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
@@ -214,16 +208,13 @@ PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<a
    ThreePlaneMeandEdX(track,calo_v,theStore);
    LLRPID(calo_v,theStore);
    BraggPID(track,algscores_v,theStore);
-   theStore.LLR_SigmaKaon = GetGenericLLRPID(calo_v,std::make_pair(3112,321));
-   theStore.LLR_SigmaProton = GetGenericLLRPID(calo_v,std::make_pair(3112,2212));
-   theStore.LLR_SigmaMuon = GetGenericLLRPID(calo_v,std::make_pair(3112,13));
 
    return theStore;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::PlaneWeight(TVector3 dir,int i_pl) const {
+double PIDManager::PlaneWeight(TVector3 dir,int i_pl){
 
    TVector3 trackvec(0, dir.Y(), dir.Z());
    trackvec = trackvec.Unit();
@@ -246,88 +237,10 @@ double PIDManager::PlaneWeight(TVector3 dir,int i_pl) const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl) const {
+double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
 
    TVector3 trackdir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
    return PlaneWeight(trackdir,i_pl);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//void PIDManager::LoadGenericLLRPID(const fhicl::ParameterSet& p){
-void PIDManager::LoadGenericLLRPID(){
-
-  TFile* f = TFile::Open(PIDReferenceHists.c_str());
-
-  for(size_t i_pdg=0;i_pdg<pdg_v.size();i_pdg++){
-     const std::string pdg = std::to_string(pdg_v.at(i_pdg));
-     h_dEdx_Reference_Plane0.push_back(static_cast<TH3D*>(f->Get((pdg+"_Plane0").c_str()))); 
-     h_dEdx_Reference_Plane1.push_back(static_cast<TH3D*>(f->Get((pdg+"_Plane1").c_str()))); 
-     h_dEdx_Reference_Plane2.push_back(static_cast<TH3D*>(f->Get((pdg+"_Plane2").c_str()))); 
-  }
- 
-  f->Close();
-
-  std::cout << "PIDManager: Loaded PID reference hists from " << PIDReferenceHists << std::endl;
-
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-double PIDManager::GetGenericLLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::pair<int,int> hypotheses) const {
-
-   if(PIDReferenceHists == "")
-     throw cet::exception("PIDManager:") << "Generic LLR PID reference hists not loaded" << std::endl;
-
-   int pdg_index_first = -1;
-   int pdg_index_second = -1;
-   for(size_t i_pdg=0;i_pdg<pdg_v.size();i_pdg++){
-     if(pdg_v.at(i_pdg) == hypotheses.first) pdg_index_first = i_pdg;
-     if(pdg_v.at(i_pdg) == hypotheses.second) pdg_index_second = i_pdg;
-   }
- 
-   // TODO: Add a check to catch if hypothesis isn't in reference
-
-   double llr = 0;
-
-   for(auto const &calo : calo_v){
-
-      auto const &plane = calo->PlaneID().Plane;
-
-      TH3D* h_hyp_first = nullptr;
-      TH3D* h_hyp_second = nullptr;
-
-      if(plane == kPlane0){
-        h_hyp_first = h_dEdx_Reference_Plane0.at(pdg_index_first);
-        h_hyp_second = h_dEdx_Reference_Plane0.at(pdg_index_second);
-      }
-      if(plane == kPlane1){
-        h_hyp_first = h_dEdx_Reference_Plane1.at(pdg_index_first);
-        h_hyp_second = h_dEdx_Reference_Plane1.at(pdg_index_second);
-      }
-      if(plane == kPlane2){
-        h_hyp_first = h_dEdx_Reference_Plane2.at(pdg_index_first);
-        h_hyp_second = h_dEdx_Reference_Plane2.at(pdg_index_second);
-      }
-
-      auto const &dedx_values = calo->dEdx();
-      auto const &rr = calo->ResidualRange();
-      auto const &pitch = calo->TrkPitchVec();
-      for(size_t i_p=0;i_p<dedx_values.size();i_p++){ 
-        int bin_x = h_hyp_first->GetXaxis()->FindBin(rr.at(i_p));
-        int bin_y = h_hyp_first->GetYaxis()->FindBin(dedx_values.at(i_p));
-        int bin_z = h_hyp_first->GetZaxis()->FindBin(180/3.142*acos(0.3/pitch.at(i_p)));
-        double l_first = h_hyp_first->GetBinContent(bin_x,bin_y,bin_z);
-        double l_second = h_hyp_second->GetBinContent(bin_x,bin_y,bin_z);
-        //std::cout << l_first <<  "  " << l_second << std::endl;
-        if(l_first > 0 && l_second > 0 && !std::isnan(l_first) && !std::isnan(l_second)) llr += log(l_first) - log(l_second);
-      } 
-    }
-    
-   //std::cout << "Score: " << 2/3.1415*atan(llr) << std::endl;
-
-  return 2.0/3.1415*atan(llr);
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

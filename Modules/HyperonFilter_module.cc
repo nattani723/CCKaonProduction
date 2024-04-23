@@ -21,7 +21,7 @@
 
 #include <memory>
 
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
+#include "ubana/CCKaonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
 
 namespace hyperon {
    class HyperonFilter;

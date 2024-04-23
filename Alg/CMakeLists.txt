@@ -1,6 +1,6 @@
 art_make( 
 
-      LIBRARY_NAME     uboonecode_uboone_HyperonProduction_Algorithms
+      LIBRARY_NAME     uboonecode_uboone_CCKaonProduction_Algorithms
 
       LIB_LIBRARIES
       #${ROOT_BASIC_LIB_LIST}

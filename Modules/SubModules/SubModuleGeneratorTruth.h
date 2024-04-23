@@ -16,10 +16,10 @@
 #include "nusimdata/SimulationBase/MCNeutrino.h"
 #include "cetlib_except/exception.h"
 
-#include "ubana/HyperonProduction/Headers/FV.h"
-#include "ubana/HyperonProduction/Headers/ParticleTypes.h"
-#include "ubana/HyperonProduction/Objects/SimParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
+#include "ubana/CCKaonProduction/Headers/FV.h"
+#include "ubana/CCKaonProduction/Headers/ParticleTypes.h"
+#include "ubana/CCKaonProduction/Objects/SimParticle.h"
+#include "ubana/CCKaonProduction/Objects/Helpers.h"
 
 namespace hyperon {
 

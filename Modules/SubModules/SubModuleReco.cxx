@@ -25,10 +25,8 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("MetadataModuleLabel"),
                   pset.get<std::string>("GeneratorModuleLabel"),
                   pset.get<std::string>("G4ModuleLabel"),
-                  pset.get<fhicl::ParameterSet>("PIDSettings"),
                   pset.get<bool>("DoGetPIDs",true),
                   pset.get<bool>("IncludeCosmics",false),
-        
                   particlegunmode)
 {
 
@@ -39,8 +37,8 @@ SubModuleReco(e,isdata,
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                                      string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                                     string g4label,fhicl::ParameterSet pidsettings,bool dogetpids,bool includecosmics,bool particlegunmode) :
-PIDCalc(pidsettings),
+                                     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode) :
+PIDCalc(),
 DoGetPIDs(dogetpids),
 IncludeCosmics(includecosmics),
 ParticleGunMode(particlegunmode)
@@ -235,11 +233,6 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
 
    if(!IsData) TruthMatch(trk,P);
 
-   if(!IsData){
-     std::vector<std::pair<int,double>> pdgs = EnhancedTruthMatch(trk);
-     std::cout << pdgs.at(0).first << " " << pdgs.at(0).second << " " <<  pdgs.at(1).first << " " << pdgs.at(1).second << " " << pdgs.at(2).first << " " << pdgs.at(2).second << std::endl;
-   }
-
    if(DoGetPIDs) GetPIDs(trk,P);
    
    theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
@@ -309,62 +302,6 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<std::pair<int,double>> SubModuleReco::EnhancedTruthMatch(const art::Ptr<recob::Track> &trk){
-
-   std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
-
-   std::unordered_map<int,double>  trkide;
-   int maxhits=-1;
-   int maxhits2=-1;
-   int maxhits3=-1;
-
-   simb::MCParticle const* matchedParticle = NULL;
-   simb::MCParticle const* matchedParticle2 = NULL;
-   simb::MCParticle const* matchedParticle3 = NULL;
-
-   std::vector<simb::MCParticle const*> particleVec;
-   std::vector<anab::BackTrackerHitMatchingData const*> matchVec;
-
-   for(size_t i_hit=0;i_hit<hits.size();++i_hit){
-
-      particleVec.clear();
-      matchVec.clear();
-      ParticlesPerHit->get(hits[i_hit].key(),particleVec,matchVec);
-
-      for(size_t i_particle=0;i_particle<particleVec.size();++i_particle){
-
-         trkide[particleVec[i_particle]->TrackId()]++; 
-
-         if(trkide[particleVec[i_particle]->TrackId()] > maxhits){
-            maxhits = trkide[particleVec[i_particle]->TrackId()];
-            matchedParticle = particleVec[i_particle];
-         }
-         else if(trkide[particleVec[i_particle]->TrackId()] > maxhits2){
-            maxhits2 = trkide[particleVec[i_particle]->TrackId()];
-            matchedParticle2 = particleVec[i_particle];
-         }
-         else if(trkide[particleVec[i_particle]->TrackId()] > maxhits3){
-            maxhits3 = trkide[particleVec[i_particle]->TrackId()];
-            matchedParticle3 = particleVec[i_particle];
-         }
-
-      }
-   }
-
-   int pdg = 0;
-   int pdg2 = 0;
-   int pdg3 = 0;
-     
-   if(matchedParticle != NULL) pdg = matchedParticle->PdgCode(); 
-   if(matchedParticle2 != NULL) pdg2 = matchedParticle2->PdgCode(); 
-   if(matchedParticle3 != NULL) pdg3 = matchedParticle3->PdgCode(); 
-
-   return {{pdg,(double)maxhits/hits.size()},{pdg2,(double)maxhits2/hits.size()},{pdg3,(double)maxhits3/hits.size()}}; 
-
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
    std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
@@ -380,10 +317,105 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
    P.MeandEdX_Plane2 = store.MeandEdX_Plane2;
    P.MeandEdX_ThreePlane = store.MeandEdX_3Plane;
    P.Track_Bragg_PID_Kaon = store.Bragg_Kaon_3Plane;
-   P.Track_LLR_PID_SigmaKaon = store.LLR_SigmaKaon;
-   P.Track_LLR_PID_SigmaProton = store.LLR_SigmaProton;
-   P.Track_LLR_PID_SigmaMuon = store.LLR_SigmaMuon;
 
+/*
+   // LLR PID Calculation
+
+   double this_llr_pid=0;
+   double this_llr_pid_score=0;
+   double this_llr_pid_kaon=0;
+   double this_llr_pid_score_kaon=0;
+   
+   double this_llr_pid_kaon_partial = 0;
+   double this_llr_pid_score_kaon_partial = 0;
+
+   for(auto const &calo : caloFromTrack){
+
+      auto const &plane = calo->PlaneID().Plane;
+      auto const &dedx_values = calo->dEdx();
+      auto const &rr = calo->ResidualRange();
+      auto const &pitch = calo->TrkPitchVec();
+      std::vector<std::vector<float>> par_values;
+      par_values.push_back(rr);
+      par_values.push_back(pitch);
+
+      // Get parital length PIDs
+      std::vector<std::vector<float>> par_values_partial;
+      std::vector<float> dedx_values_partial,rr_partial,pitch_partial;      
+      if(calo->dEdx().size() != calo->ResidualRange().size() || calo->ResidualRange().size() != calo->TrkPitchVec().size())
+         throw cet::exception("SubModuleReco") << "Track calo point list size mismatch" << std::endl;
+      for(size_t i_p=0;i_p<calo->dEdx().size();i_p++){
+         if(rr.at(i_p) > ResRangeCutoff) continue;
+         dedx_values_partial.push_back(calo->dEdx().at(i_p));
+         rr_partial.push_back(calo->ResidualRange().at(i_p));
+         pitch_partial.push_back(calo->TrkPitchVec().at(i_p));        
+      }
+      par_values_partial.push_back(rr_partial);
+      par_values_partial.push_back(pitch_partial);
+  
+      if(calo->ResidualRange().size() == 0) continue;
+
+      float calo_energy = 0;
+      for(size_t i=0;i<dedx_values.size();i++)
+         calo_energy += dedx_values[i] * pitch[i];
+
+      float llr_pid = llr_pid_calculator.LLR_many_hits_one_plane(dedx_values,par_values,plane);
+      float llr_pid_kaon = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values,par_values,plane);
+      this_llr_pid += llr_pid;
+      this_llr_pid_kaon += llr_pid_kaon;
+
+     // Partial length calculation
+     float calo_energy_partial = 0;
+      for(size_t i=0;i<dedx_values_partial.size();i++)
+         calo_energy_partial += dedx_values_partial[i] * pitch_partial[i];
+
+      float llr_pid_kaon_partial = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values_partial,par_values_partial,plane);
+      this_llr_pid_kaon_partial += llr_pid_kaon_partial;     
+   }
+
+   this_llr_pid_score = atan(this_llr_pid/100.)*2/3.14159266;
+   this_llr_pid_score_kaon = atan(this_llr_pid_kaon/100.)*2/3.14159266;
+   this_llr_pid_score_kaon_partial = atan(this_llr_pid_kaon_partial/100.)*2/3.14159266;
+
+   P.Track_LLR_PID = this_llr_pid_score;
+   P.Track_LLR_PID_Kaon = this_llr_pid_score_kaon;
+   P.Track_LLR_PID_Kaon_Partial = this_llr_pid_score_kaon_partial;
+   */
+
+
+/*
+   // LLR PID Scores Calculation
+   LLRPID_Result LLPIDs = LLRPIDCalc.GetScores(caloFromTrack);
+   P.Track_LLR_PID = LLPIDs.Score;
+   P.Track_LLR_PID_Kaon = LLPIDs.Score_Kaon;
+   P.Track_LLR_PID_Kaon_Partial = LLPIDs.Score_Kaon_Partial;
+
+   // Mean dE/dX Calculation
+   dEdXStore dEdXs = dEdXCalc.ThreePlaneMeandEdX(trk,caloFromTrack);
+   P.MeandEdX_Plane0 = dEdXs.Plane0;
+   P.MeandEdX_Plane1 = dEdXs.Plane1;
+   P.MeandEdX_Plane2 = dEdXs.Plane2;
+   P.MeandEdX_ThreePlane = dEdXs.ThreePlaneAverage;
+*/
+
+
+/*
+   // 3 Plane Proton PID (Pip Hamilton)
+   std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
+
+   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
+
+   for(size_t i_algscore=0;i_algscore<AlgScoresVec.size();i_algscore++){
+
+      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
+
+      if(TMath::Abs(AlgScore.fAssumedPdg) == 2212 && AlgScore.fAlgName=="ThreePlaneProtonPID" && anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood && anab::kTrackDir(AlgScore.fTrackDir) == anab::kForward)
+         P.TrackPID = std::log(AlgScore.fValue);
+
+      if(TMath::Abs(AlgScore.fAssumedPdg) == 321) std::cout << AlgScore.fAlgName << std::endl;
+
+   }
+*/
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -102,8 +102,9 @@ private:
   std::vector<std::string> t_CCNC;
   
   // Flags applying to the entire event
-  bool t_EventHasNeutronScatter;
+  bool t_EventHasKaonPScatter;
   bool t_EventHasHyperon;
+  bool t_EventHasKaon;
   bool t_EventHasKaonP;
   bool t_EventHasKaonM;
   bool t_EventHasKaon0;
@@ -117,8 +118,13 @@ private:
   std::vector<bool> t_IsKaonP;
   std::vector<bool> t_IsKaonP_NuMuP;
   std::vector<bool> t_IsKaonP_PiPPi0;
+  std::vector<bool> t_IsKaonP_2PiPPiM;
+  std::vector<bool> t_IsKaonP_ENuE;
+  std::vector<bool> t_IsKaonP_2PiNPiP;
+  std::vector<bool> t_IsKaonP_Others;
   std::vector<bool> t_IsKaonM;
   std::vector<bool> t_IsKaon0;
+  std::vector<bool> t_IsAssociatedKaonP;
   std::vector<bool> t_IsSignal;
   std::vector<bool> t_IsSignal_NuMuP;
   std::vector<bool> t_IsSignal_PiPPi0;
@@ -145,12 +151,15 @@ private:
   std::vector<SimParticle> t_PrimaryNucleon;
   std::vector<SimParticle> t_PrimaryPion;
   std::vector<SimParticle> t_PrimaryKaon; 
+  std::vector<SimParticle> t_PrimaryKaonP; 
+  std::vector<SimParticle> t_PrimaryKaonM; 
   std::vector<SimParticle> t_PrimaryNucleus; 
   std::vector<SimParticle> t_HyperonDecay;
   std::vector<SimParticle> t_KaonPDecay;
   std::vector<SimParticle> t_KaonPDecay_NuMuP; 
   std::vector<SimParticle> t_KaonPDecay_PiPPi0;
   std::vector<SimParticle> t_KaonMDecay;
+  std::vector<SimParticle> t_Kaon0Decay;
   std::vector<SimParticle> t_NeutralKaonDecayK0SL;
   
   std::vector<double> t_TruePrimaryVertex_X;
@@ -277,13 +286,19 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_IsKaonP.clear();
    t_IsKaonP_NuMuP.clear();
    t_IsKaonP_PiPPi0.clear();
+   t_IsKaonP_ENuE.clear();
+   t_IsKaonP_2PiNPiP.clear();
+   t_IsKaonP_2PiPPiM.clear();
+   t_IsKaonP_Others.clear();
+   t_IsAssociatedKaonP.clear();
    t_IsKaonM.clear();
    t_IsKaon0.clear();
    t_IsSignal.clear();
    t_IsSignal_NuMuP.clear();
    t_IsSignal_PiPPi0.clear();
-   t_EventHasNeutronScatte = false;
+   t_EventHasKaonPScatte = false;
    t_EventHasHyperon = false;
+   t_EventHasKaon = false;
    t_EventHasKaonP = false;
    t_EventHasKaonM = false;
    t_EventHasKaon0 = false;
@@ -295,12 +310,15 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_PrimaryNucleon.clear();
    t_PrimaryPion.clear();
    t_PrimaryKaon.clear();
+   t_PrimaryKaonP.clear();
+   t_PrimaryKaonM.clear();
    t_PrimaryNucleus.clear();
    t_HyperonDecay.clear();
    t_KaonPDecay.clear();
    t_KaonPDecay_NuMuP.clear();
    t_KaonPDecay_PiPPi0.clear();
    t_KaonMDecay.clear();
+   t_Kaon0Decay.clear();
    t_NeutralKaonDecayK0SL.clear();
 
    t_TruePrimaryVertex_X.clear();
@@ -367,14 +385,21 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
 
       t_InActiveTPC = G4T.InActiveTPC; // add more fv cuts
       t_IsHyperon = G4T.IsHyperon;
+      t_IsKaon = G4T.IsKaon;
       t_IsKaonP = G4T.IsKaonP;
       t_IsKaonP_NuMuP = G4T.IsKaonP_NuMuP;
       t_IsKaonP_PiPPi0 = G4T.IsKaonP_PiPPi0;
+      t_IsKaonP_2PiPPiM = G4T.IsKaonP_2PiPPiM;
+      t_IsKaonP_ENuE = G4T.IsKaonP_ENuE;
+      t_IsKaonP_2PiNPiP = G4T.IsKaonP_2PiNPiP;
+      t_IsKaonP_Others = G4T.IsKaonP_Others;
+      t_IsAssociatedKaonP = G4T.IsAssociatedKaonP;
       t_IsKaonM = G4T.IsKaonM;
       t_IsKaon0 = G4T.IsKaon0;
 
-      t_EventHasNeutronScatter = G4T.EventHasNeutronScatter;
+      t_EventHasKaonPScatter = G4T.EventHasKaonPScatter;
       t_EventHasHyperon = G4T.EventHasHyperon;
+      t_EventHasKaon = G4T.EventHasKaon;
       t_EventHasKaonP = G4T.EventHasKaonP;
       t_EventHasKaonM = G4T.EventHasKaonM;
       t_EventHasKaon0 = G4T.EventHasKaon0;
@@ -386,12 +411,15 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       t_PrimaryNucleon = G4T.PrimaryNucleon;
       t_PrimaryPion = G4T.PrimaryPion;
       t_PrimaryKaon = G4T.PrimaryKaon;
+      t_PrimaryKaonP = G4T.PrimaryKaonP;
+      t_PrimaryKaonP = G4T.PrimaryKaonM;
       t_PrimaryNucleus = G4T.PrimaryNucleus;
       t_HyperonDecay = G4T.Decay;
       t_KaonPDecay = G4T.KaonPDecay;
       t_KaonPDecay_NuMuP = G4T.KaonPDecay_NuMuP;
       t_KaonPDecay_PiPPi0 = G4T.KaonPDecay_PiPPi0;
       t_KaonMDecay = G4T.KaonMDecay;
+      t_Kaon0Decay = G4T.Kaon0Decay;
       t_NeutralKaonDecayK0SL = G4T.NeutralKaonDecayK0SL;
 
       t_TruePrimaryVertex_X = G4T.TruePrimaryVertex_X;
@@ -667,6 +695,7 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("PrimaryNucleon","vector<SimParticle>",&t_PrimaryNucleon);
    OutputTree->Branch("PrimaryPion","vector<SimParticle>",&t_PrimaryPion);
    OutputTree->Branch("PrimaryKaon","vector<SimParticle>",&t_PrimaryKaon);
+   OutputTree->Branch("PrimaryKaonP","vector<SimParticle>",&t_PrimaryKaonP);
    OutputTree->Branch("PrimaryNucleus","vector<SimParticle>",&t_PrimaryNucleus);
    OutputTree->Branch("HyperonDecay","vector<SimParticle>",&t_HyperonDecay);
    OutputTree->Branch("KaonPDecay","vector<SimParticle>",&t_KaonPDecay);

@@ -1,7 +1,7 @@
 #ifndef _ParticleTypes_h_
 #define _ParticleTypes_h_
 
-namespace hyperon {
+namespace cckaon {
 
   inline bool isHyperon(int pdg){ return abs(pdg) == 3122 || abs(pdg) == 3212 || abs(pdg) == 3222 || abs(pdg) == 3112; }
   
@@ -18,6 +18,8 @@ namespace hyperon {
   inline bool isKaonP(int pdg){ return pdg == 321; }
 
   inline bool isKaonM(int pdg){ return pdg == -321; }
+
+  inline bool isKaon0(int pdg){ return abs(pdg) == 130 || abs(pdg) == 310; }
 
   inline bool isPionP(int pdg){ return pdg == 211; }
 

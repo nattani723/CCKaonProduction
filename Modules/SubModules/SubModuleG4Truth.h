@@ -30,8 +30,9 @@ namespace cckaon {
     
     // Flags applying to the entire event 
     // Use for sample orthogonality
+    bool EventHasKaonPScatter = false;
     bool EventHasHyperon = false;
-    bool EventHasNeutronScatter = false;
+    bool EventHasKaon = false;
     bool EventHasKaonP = false;
     bool EventHasKaonM = false;
     bool EventHasKaon0 = false;
@@ -39,11 +40,17 @@ namespace cckaon {
     // Flags for each MCTruth
     std::vector<bool> InActiveTPC;//add more fv cuts
     std::vector<bool> IsHyperon;
+    std::vector<bool> IsKaon;
     std::vector<bool> IsKaonP;
     std::vector<bool> IsKaonP_NuMuP;
     std::vector<bool> IsKaonP_PiPPi0;
+    std::vector<bool> IsKaonP_2PiPPiM;
+    std::vector<bool> IsKaonP_ENuE;
+    std::vector<bool> IsKaonP_2PiNPiP;
+    std::vector<bool> IsKaonP_Others;
     std::vector<bool> IsKaonM;
     std::vector<bool> IsKaon0;
+    std::vector<bool> IsAssociatedKaonP;
 
     double Weight = 1.0;
     
@@ -52,12 +59,15 @@ namespace cckaon {
     std::vector<SimParticle> PrimaryNucleon;
     std::vector<SimParticle> PrimaryPion;
     std::vector<SimParticle> PrimaryKaon;
+    std::vector<SimParticle> PrimaryKaonP;
+    std::vector<SimParticle> PrimaryKaonM;
     std::vector<SimParticle> PrimaryNucleus;
     std::vector<SimParticle> HyperonDecay;
     std::vector<SimParticle> KaonPDecay;
     std::vector<SimParticle> KaonPDecay_NuMuP;
     std::vector<SimParticle> KaonPDecay_PiPPi0;
     std::vector<SimParticle> KaonMDecay;
+    std::vector<SimParticle> Kaon0Decay;
     std::vector<SimParticle> NeutralKaonDecayK0SL;
 
     //TVector3 DecayVertex;
@@ -84,17 +94,19 @@ namespace cckaon {
     G4Truth GetG4Info();
     
     void GetPrimaryParticles();
+    void GetKaonPDecay();
+    void GetKaonMDecay();
+    void GetKaon0Decay();
+    void GetNeutralKaonDecay();
     void GetHyperonDecay();
-    void GetKaonDecay();
     void GetSigmaZeroDecay();
     void GetNeutralKaonDecay();
-    bool FindNeutronScatter();
+    bool FindKaonPScatter();
     int GetOrigin(int trackid);
     void MCTruthMatch(SimParticle &P);
     void MCTruthMatch(SimParticle &P,int trackid);
     void SetFlags();
     
-    void SetNeutronScatterThresholds(double neutronscatterprotonthresh,double neutronscatterpionthresh);
     void SetDecayThresholds(double decayprotonthresh,double decaypionthresh);
 
   private:
@@ -105,14 +117,14 @@ namespace cckaon {
     art::Handle<std::vector<simb::MCParticle>> Handle_G4;
     std::vector<art::Ptr<simb::MCParticle>> Vect_G4;
     
-    std::vector<int> Daughter_IDs;        // IDs of Lambda,SigmaP,SigmaM decay products
-    std::vector<int> SigmaZero_Daughter_IDs; // IDs of SigmaZero decay products
     std::vector<int> Primary_IDs;         // IDs of particles produced at primary vertex
-    std::vector<int> Kaon_Daughter_IDs;   // IDs of Kaon decay products
-    // NOTE: If GENIE produces a K0 (pdg 311), it will instantly decay it into a K0S (pdg 310)/K0L (pdg 130), then propagates
-    // those. PrimaryK0SL is to capture the ID of the K0S/K0L, in order to then identify their decay products 
-    std::vector<int> PrimaryK0SL_IDs;     // IDs of primary K0S/K0L
-    std::vector<int> NeutralKaon_Daughter_IDs;  
+    std::vector<int> Hyperon_Daughter_IDs;        // IDs of Lambda,SigmaP,SigmaM decay products
+
+    std::vector<int> KaonP_Daughter_IDs;   // IDs of Kaon+ decay products
+    std::vector<int> KaonP_Inelastic_Daughter_IDs;   // IDs of Kaon+ decay products
+    std::vector<int> KaonM_Daughter_IDs;   // IDs of Kaon- decay products
+    std::vector<int> Kaon0_Daughter_IDs;   // IDs of Kaon0 decay products
+    std::vector<int> NeutralKaon_Daughter_IDs;
     
     std::vector<TVector3> PrimaryVertices;
     bool PosMatch(TVector3 Pos1,TVector3 Pos2);
@@ -120,9 +132,6 @@ namespace cckaon {
     std::map<int,art::Ptr<simb::MCParticle>> partByID;
     
     std::vector<int> GetChildIDs(const art::Ptr<simb::MCParticle> &g4p,bool IsNeutron=false);
-    
-    double NeutronScatterProtonThresh = 0.15;
-    double NeutronScatterPionThresh = 0.05;
     
     double DecayProtonThresh = 0.0;
     double DecayPionThresh = 0.0;

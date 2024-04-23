@@ -19,6 +19,8 @@ namespace cckaon {
 
   inline bool isKaonM(int pdg){ return pdg == -321; }
 
+  inline bool isKaon0(int pdg){ return abs(pdg) == 130 || abs(pdg) == 310; }
+
   inline bool isPionP(int pdg){ return pdg == 211; }
 
   inline bool isPionM(int pdg){ return pdg == -211; }

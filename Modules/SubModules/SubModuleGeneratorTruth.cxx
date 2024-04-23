@@ -3,7 +3,7 @@
 
 #include "SubModuleGeneratorTruth.h"
 
-using namespace hyperon;
+using namespace cckaon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,14 +67,17 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
             theTruth.Neutrino.push_back(P);
          }
 
-         // If there is a hyperon in the final state in a QEL event, change mode to HYP
-         if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
+         // If there is a kaon in the final state in a RES/DIS event, change mode to KAON
+         if(isKaon(Part.PdgCode()) && Part.StatusCode() == 1 && ( mode == 1 || mode == 2) ) theTruth.Mode.back() = "KAON";
 
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
          if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){
             theTruth.EventHasHyperon = true;
          }
          if(Part.StatusCode() == 1 && isKaon(Part.PdgCode())) theTruth.EventHasKaon = true;        
+         if(Part.StatusCode() == 1 && isKaonP(Part.PdgCode())) theTruth.EventHasKaonP = true;        
+         if(Part.StatusCode() == 1 && isKaonM(Part.PdgCode())) theTruth.EventHasKaonM = true;        
+         if(Part.StatusCode() == 1 && isKaon0(Part.PdgCode())) theTruth.EventHasKaon0 = true;        
  
          if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
             theTruth.TruePrimaryVertex_X.push_back(Part.Vx());

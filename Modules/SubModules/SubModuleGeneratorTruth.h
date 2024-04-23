@@ -21,7 +21,7 @@
 #include "ubana/CCKaonProduction/Objects/SimParticle.h"
 #include "ubana/CCKaonProduction/Objects/Helpers.h"
 
-namespace hyperon {
+namespace cckaon {
 
 struct GeneratorTruth {
 
@@ -36,7 +36,9 @@ struct GeneratorTruth {
    std::vector<std::string> CCNC;
    bool EventHasFinalStateNeutron=false;
    bool EventHasHyperon=false; 
-   bool EventHasKaon=false; 
+   bool EventHasKaonP=false; 
+   bool EventHasKaonM=false; 
+   bool EventHasKaon0=false; 
 
 };
 
@@ -53,6 +55,7 @@ private:
    std::vector<art::Ptr<simb::MCTruth>> Vect_MCTruth;
    GeneratorTruth theTruth;
 
+   std::vector<int> KaonPDGs = {321,311,310,130};
    std::vector<int> HyperonPDGs = {3122,3212,3112,3222};
    const bool ParticleGunMode;
 };

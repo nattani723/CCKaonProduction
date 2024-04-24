@@ -3,7 +3,7 @@
 
 #include "TVector3.h"
 
-namespace hyperon {
+namespace cckaon {
 
 const std::vector<double> TPCCenter = { 126.625 , 0.97 , 518.5 }; //center of active TPC
 const std::vector<double> TPCSideLengths = { 236.35 , 233.0 , 1036.8 }; //side lengths of active TPC
@@ -16,6 +16,21 @@ const double FVymax = 117.47;
 const double FVzmin = 0.1;
 const double FVzmax = 1036.9;
 
+const double FVxmin_5cm = 5.0;
+const double FVxmax_5cm = 251.35;
+const double FVymin_5cm = -110.53;
+const double FVymax_5cm = 112.47;
+const double FVzmin_5cm = 5.1;
+const double FVzmax_5cm = 1031.9;
+
+const double FVxmin_CCInclusive = 0.0;
+const double FVxmax_CCInclusive = 246.35;
+const double FVymin_CCInclusive = -105.53;
+const double FVymax_CCInclusive = 107.47;
+const double FVzmin_CCInclusive = 10.1;
+const double FVzmax_CCInclusive = 986.8;
+
+
 inline bool inActiveTPC(TVector3 pos){
    if(pos.X() > FVxmax || pos.X() < FVxmin) return false;
    if(pos.Y() > FVymax || pos.Y() < FVymin) return false;
@@ -23,53 +38,23 @@ inline bool inActiveTPC(TVector3 pos){
    return true;
 }
 
+inline bool inActiveTPC5cm(TVector3 pos){
+   if(pos.X() > FVxmax_5cm || pos.X() < FVxmin_5cm) return false;
+   if(pos.Y() > FVymax_5cm || pos.Y() < FVymin_5cm) return false;
+   if(pos.Z() > FVzmax_5cm || pos.Z() < FVzmin_5cm) return false;
+   return true;
 }
 
-//DEPRECATED
-
-/*
-const double FVxmin = 12.0;
-const double FVxmax = 256.35 - 12.0;
-const double FVymin = -115.53 + 35;
-const double FVymax = 117.47 - 35;
-const double FVzmin = 0.1 + 25;
-const double FVzmax = 1036.9 - 85;
-
-//dead region to be cut
-const double deadzmin = 675.1;
-const double deadzmax = 775.1;
-
-
-inline bool inActiveTPC(TVector3 pos){
-
-if(pos.X() > FVxmax || pos.X() < FVxmin) return false;
-
-if(pos.Y() > FVymax || pos.Y() < FVymin) return false;
-
-if(pos.Z() > FVzmax || pos.Z() < FVzmin) return false;
-
-if(pos.Z() < deadzmax && pos.Z() > deadzmin) return false;
-
-	return true;
+inline bool inActiveTPCCCInclusive(TVector3 pos){
+   if(pos.X() > FVxmax_CCInclusive || pos.X() < FVxmin_CCInclusive) return false;
+   if(pos.Y() > FVymax_CCInclusive || pos.Y() < FVymin_CCInclusive) return false;
+   if(pos.Z() > FVzmax_CCInclusive || pos.Z() < FVzmin_CCInclusive) return false;
+   return true;
 }
-*/
 
-/*
-bool inActiveTPC(std::vector<double> pos){
 
-if(pos.size() != 3) { std::cout << "Not a position vector!!!" << std::endl; return false; }
-
-if(pos.at(0) > FVxmax || pos.at(0) < FVxmin) return false;
-
-if(pos.at(1) > FVymax || pos.at(1) < FVymin) return false;
-
-if(pos.at(2) > FVzmax || pos.at(2) < FVzmin) return false;
-
-if(pos.at(2) < 	deadzmax && pos.at(2) > deadzmin) return false;
-
-	return true;
 }
-*/
+
 
 #endif
 

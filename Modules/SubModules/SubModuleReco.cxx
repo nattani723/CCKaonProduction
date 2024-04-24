@@ -23,6 +23,7 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("HitModuleLabel"),
                   pset.get<std::string>("HitTruthAssnLabel"),
                   pset.get<std::string>("TrackHitAssnLabel"),
+		  pset.get<std::string>("TrackRebuiltHitAssnLabel"),
                   pset.get<std::string>("ShowerHitAssnLabel"),
                   pset.get<std::string>("MetadataModuleLabel"),
                   pset.get<std::string>("GeneratorModuleLabel"),
@@ -62,20 +63,25 @@ ParticleGunMode(particlegunmode)
 
    art::fill_ptr_vector(Vect_PFParticle,Handle_PFParticle);
    art::fill_ptr_vector(Vect_Track,Handle_Track);
+   art::fill_ptr_vector(Vect_TrackRebuilt,Handle_Track);
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
    Assoc_PFParticleVertex = new art::FindManyP<recob::Vertex>(Vect_PFParticle,e,vertexlabel);    
-   Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle,e,tracklabel);    
+   Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle,e,tracklabel);
+   Assoc_PFParticleTrackRebuilt = new art::FindManyP<recob::Track>(Vect_PFParticle,e,trackrebuiltlabel); 
    Assoc_PFParticleShower = new art::FindManyP<recob::Shower>(Vect_PFParticle,e,showerlabel);    
    Assoc_PFParticleMetadata = new art::FindManyP<larpandoraobj::PFParticleMetadata>(Vect_PFParticle,e,metadatalabel);   
    Assoc_TrackHit = new  art::FindManyP<recob::Hit>(Vect_Track,e,trackhitassnlabel);
+   Assoc_TrackRebuiltHit = new  art::FindManyP<recob::Hit>(Vect_TrackRebuilt,e,trackrebuilthitassnlabel);
    Assoc_ShowerHit = new  art::FindManyP<recob::Hit>(Vect_Shower,e,showerhitassnlabel);
    ParticlesPerHit = new art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>(Handle_Hit,e,hittruthassnlabel);
 
    if(DoGetPIDs){
       Assoc_TrackCalo = new art::FindManyP<anab::Calorimetry>(Vect_Track,e,calolabel);
+      Assoc_TrackRebuiltCalo = new art::FindManyP<anab::Calorimetry>(Vect_TrackRebuilt,e,calolabel);
       Assoc_TrackPID = new art::FindManyP<anab::ParticleID>(Vect_Track,e,pidlabel);
+      Assoc_TrackRebuiltPID = new art::FindManyP<anab::ParticleID>(Vect_TrackRebuilt,e,pidlabel);
    }
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
@@ -138,7 +144,10 @@ void SubModuleReco::PrepareInfo(){
 	    theData.TrackPrimaryDaughters.push_back(P);
             m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
 	 }
-	 else theData.TrackOthers.push_back(P);
+	 else{
+	    if(P.IsRebuilt=true) theData.TrackRebuiltOthers.push_back(P);
+	    else theData.TrackOthers.push_back(P);
+	 }
       }
       else if(P.PDG == 11){
 	 //theData.ShowerPrimaryDaughters.push_back(P);
@@ -151,6 +160,7 @@ void SubModuleReco::PrepareInfo(){
    theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
    theData.NPrimaryShowerDaughters = theData.ShowerPrimaryDaughters.size();
    theData.NOtherTracks = theData.TrackOthers.size();
+   theData.NOtherRebuiltTracks = theData.TrackRebuiltOthers.size();
    theData.NOtherShowers = theData.ShowerOthers.size();
 }
 
@@ -198,14 +208,21 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
    P.PDG = pfp->PdgCode();
 
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
+   std::vector<art::Ptr<recob::Track>> pfpTrackRebuilts = Assoc_PFParticleTrackRebuilt->at(pfp.key());
    std::vector<art::Ptr<recob::Shower>> pfpShowers = Assoc_PFParticleShower->at(pfp.key());
 
    if(pfp->PdgCode() == 13 && pfpTracks.size() != 1) P.PDG = 0; // how to handle scattered particles
+   if(pfp->PdgCode() == 13 && pfpTrackRebuilts.size() != 1) P.PDG = 0;
    if(pfp->PdgCode() == 11 && pfpShowers.size() != 1) P.PDG = 0;
 
    GetPFPMetadata(pfp,P);
 
    if(pfpTracks.size() == 1){
+      GetTrackData(pfp,P);
+      GetVertexData(pfp,P);
+   }
+   if(pfpTrackRebuilts.size() == 1){
+      P.IsRebuilt = true;
       GetTrackData(pfp,P);
       GetVertexData(pfp,P);
    }
@@ -242,7 +259,14 @@ void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoPa
 
 void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
-   std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
+   if(P.IsRebuilt=true){
+	std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrackRebuilt->at(pfp.key());
+	std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackRebuiltHit->at(trk.key());
+   }
+   else{
+	std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
+	std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
+   }
 
    if(pfpTracks.size() != 1) return;
 
@@ -253,7 +277,6 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
 
    if(!IsData) TruthMatch(trk,P);
 
-   std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
    if(!IsData) MergeCheck(hits,P);
 
    if(DoGetPIDs) GetPIDs(trk,P);
@@ -290,7 +313,8 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 
 void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
-   std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
+  if(P.IsRebuilt=true) std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackRebuiltHit->at(trk.key());
+  else std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
 
    std::unordered_map<int,double>  trkide;
    int maxhits=-1;
@@ -452,8 +476,15 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
 
 void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
-   std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
-   std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
+   if(P.IsRebuilt=true){
+	std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackRebuiltCalo->at(trk.key());
+   	std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackRebuiltPID->at(trk.key());
+   }
+   else{
+	std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
+   	std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
+   }
+
    std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
 
    PIDStore store = PIDCalc.GetPIDs(trk,caloFromTrack,AlgScoresVec);

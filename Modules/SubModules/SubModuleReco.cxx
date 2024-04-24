@@ -124,21 +124,34 @@ void SubModuleReco::PrepareInfo(){
          P.Parentage = 1;
          P.InNuSlice = true;         
       }
-      else if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){ // has daughter track
-         P.Parentage = 2; 
-         P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
+      else{ 	      
+	if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){ // has daughter track
+         	P.Parentage = 2; 
+         	P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
+	}
+	else P.Parentage = 3;
       }
 
-      if(P.PDG == 13){ // primary means nu? This is Pandora PDG code (11 or 13)
-         theData.TrackPrimaryDaughters.push_back(P);
-         if(P.InNuSlice) m_PFPID_TrackIndex[pfp->Self()] = P.Index; // CCMuon? track as neutrino daughter
+      if(P.PDG == 13){ // This is Pandora PDG code (11 or 13)
+         //theData.TrackPrimaryDaughters.push_back(P);
+	 if(P.InNuSlice){
+	    theData.TrackPrimaryDaughters.push_back(P);
+            m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
+	 }
+	 else theData.TrackOthers.push_back(P);
       }
-      else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);      
+      else if(P.PDG == 11){
+	 //theData.ShowerPrimaryDaughters.push_back(P);
+	 if(P.InNuSlice) theData.ShowerPrimaryDaughters.push_back(P);
+	 else theData.ShowerOthers.push_back(P);
+      }
    }
 
    theData.NPrimaryDaughters = theData.TrackPrimaryDaughters.size() + theData.ShowerPrimaryDaughters.size();
    theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
    theData.NPrimaryShowerDaughters = theData.ShowerPrimaryDaughters.size();
+   theData.NOtherTracks = theData.TrackOthers.size();
+   theData.NOtherShowers = theData.ShowerOthers.size();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -47,9 +47,13 @@ struct RecoData {
    int NPrimaryDaughters; 
    int NPrimaryTrackDaughters;
    int NPrimaryShowerDaughters;
+   int NOtherTracks;
+   int NOtherShowers;
 
    std::vector<RecoParticle> TrackPrimaryDaughters;
    std::vector<RecoParticle> ShowerPrimaryDaughters;
+   std::vector<RecoParticle> TrackOthers;
+   std::vector<RecoParticle> ShowerOthers;
 
    std::vector<TVector3> TrackStarts;
 

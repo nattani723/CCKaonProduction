@@ -38,7 +38,7 @@
 
 using std::string;
 
-namespace hyperon {
+namespace cckaon {
 
 struct RecoData {
 
@@ -54,10 +54,14 @@ struct RecoData {
    std::vector<TVector3> TrackStarts;
 
    size_t TrueMuonIndex = -1;
-   size_t TrueDecayProtonIndex = -1;
+   size_t TrueKaonIndex = -1;
+   size_t TrueDecayMuonIndex = -1;
    size_t TrueDecayPionIndex = -1;
 
    bool GoodReco = false;
+   bool GoodPrimaryReco = false;
+   bool GoodRecoAsShower = false;
+
 };
 
 class SubModuleReco {
@@ -114,6 +118,7 @@ class SubModuleReco {
       searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
 
       SubModuleG4Truth* G4T = nullptr;
+      CaloManager CaloCalc;
       PIDManager PIDCalc;      
 
       RecoData theData;
@@ -123,6 +128,7 @@ class SubModuleReco {
       void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
+      void GetCalos(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
 

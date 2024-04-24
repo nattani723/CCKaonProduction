@@ -202,12 +202,42 @@ void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sPartic
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void PIDManager::Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store){
+{
+
+  for(size_t i_algscore=0;i_algscore<algscores_v.size();i_algscore++){
+     anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
+
+    if (algScore.fAlgName == "Chi2" && anab::kVariableType(algScore.fVariableType) == anab::kGOF) {
+       for (int i_pl=0; i_pl<3; pl++) {
+            if (algScore.fAssumedPdg==321)  store.Chi2_Kaon.at(i_pl) = algScore.fValue;
+            if (algScore.fAssumedPdg==2212) store.Chi2_Proton.at(i_pl) = algScore.fValue;
+            if (algScore.fAssumedPdg==211)  store.Chi2_Pion.at(i_pl) = algScore.fValue;
+            if (algScore.fAssumedPdg==13)   store.Chi2_Muon.at(i_pl) = algScore.fValue;
+       }
+    }
+  }
+
+   store.Chi2_Kaon_3Plane = store.Chi2_Kaon.at(0)*PlaneWeight(track,0) + store.Chi2_Kaon.at(1)*PlaneWeight(track,1) + store.Chi2_Kaon.at(2)*PlaneWeight(track,2);
+   store.Chi2_Kaon_3Plane /= (PlaneWeight(track,0) + PlaneWeight(track,1) + PlaneWeight(track,2));
+   store.Chi2_Proton_3Plane = store.Chi2_Proton.at(0)*PlaneWeight(track,0) + store.Chi2_Proton.at(1)*PlaneWeight(track,1) + store.Chi2_Proton.at(2)*PlaneWeight(track,2);
+   store.Chi2_Proton_3Plane /= (PlaneWeight(track,0) + PlaneWeight(track,1) + PlaneWeight(track,2));
+   store.Chi2_Pion_3Plane = store.Chi2_Pion.at(0)*PlaneWeight(track,0) + store.Chi2_Pion.at(1)*PlaneWeight(track,1) + store.Chi2_Pion.at(2)*PlaneWeight(track,2);
+   store.Chi2_Pion_3Plane /= (PlaneWeight(track,0) + PlaneWeight(track,1) + PlaneWeight(track,2));
+   store.Chi2_Muon_3Plane = store.Chi2_Muon.at(0)*PlaneWeight(track,0) + store.Chi2_Muon.at(1)*PlaneWeight(track,1) + store.Chi2_Muon.at(2)*PlaneWeight(track,2);
+   store.Chi2_Muon_3Plane /= (PlaneWeight(track,0) + PlaneWeight(track,1) + PlaneWeight(track,2));
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v){
 
    PIDStore theStore;
    ThreePlaneMeandEdX(track,calo_v,theStore);
    LLRPID(calo_v,theStore);
    BraggPID(track,algscores_v,theStore);
+   Chi2PID(track,algscores_v,theStore);
 
    return theStore;
 }

@@ -165,6 +165,9 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    theTruth.PrimaryNucleon.clear();
    theTruth.PrimaryPion.clear();
    theTruth.PrimaryKaon.clear();
+   theTruth.PrimaryKaonP.clear();
+   theTruth.PrimaryKaonM.clear();
+   theTruth.PrimaryKaon0.clear();
    theTruth.PrimaryNucleus.clear();
    theTruth.HyperonDecay.clear();
    theTruth.KaonPDecay.clear();
@@ -174,10 +177,11 @@ G4Truth SubModuleG4Truth::GetG4Info(){
 
    GetPrimaryParticles();
 
-   if(SigmaZero_Daughter_IDs.size()) GetSigmaZeroDecay(); 
-   if(theTruth.Hyperon.size() || theTruth.SigmaZeroDecayLambda.size()) GetHyperonDecay();
-   if(NeutralKaon_Daughter_IDs.size()) GetNeutralKaonDecay(); 
-   if(theTruth.PrimaryKaon.size()) GetKaonDecay();
+   if(theTruth.PrimaryHyperon.size()) GetHyperonDecay();
+   if(NeutralKaon_Daughter_IDs.size()) GetNeutralKaonDecay();
+   if(theTruth.PrimaryKaon.size() || theTruth.PrimaryKaon0.size()) GetKaon0Decay();
+   if(theTruth.PrimaryKaonP.size()) GetKaonPDecay();
+   if(theTruth.PrimaryKaonM.size()) GetKaonMDecay();
 
    SetFlags(); 
 
@@ -209,6 +213,8 @@ void SubModuleG4Truth::GetPrimaryParticles(){
       if(isPion(part->PdgCode())) theTruth.PrimaryPion.push_back(P);
       if(isKaon(part->PdgCode())) theTruth.PrimaryKaon.push_back(P);
       if(isKaonP(part->PdgCode())) theTruth.PrimaryKaonP.push_back(P);
+      if(isKaonM(part->PdgCode())) theTruth.PrimaryKaonM.push_back(P);
+      if(isKaon0(part->PdgCode())) theTruth.PrimaryKaon0.push_back(P);
       if(part->PdgCode() > 10000) theTruth.PrimaryNucleus.push_back(P);
    }
 
@@ -355,7 +361,7 @@ void SubModuleG4Truth::GetNeutralKaonDecay(){
 
 void SubModuleG4Truth::GetHyperonDecay(){
 
-   if(!Daughter_IDs.size()) return;
+   if(!Hyperon_Daughter_IDs.size()) return;
 
    for(size_t i_d=0;i_d<Hyperon_Daughter_IDs.size();i_d++){
 
@@ -539,23 +545,23 @@ void SubModuleG4Truth::SetFlags(){
       theTruth.IsKaon0[i_t] = false; 
       theTruth.IsAssociatedKaonP[i_t] = false;
 
-      int nHyperons=0, nKaons=0, nKaonPs=0;
+      int nHyperons=0, nKaonPs=0;
 
-      for(size_t i_k=0;i_h<theTruth.PrimaryKaonP.size();i_h++){
+      for(size_t i_k=0;i_k<theTruth.PrimaryKaonP.size();i_k++){
          if(theTruth.PrimaryKaonP.at(i_k).MCTruthIndex == i_t){
             nKaonPs++;
             theTruth.IsKaonP[i_t] = true;
          }
       }
 
-      for(size_t i_k=0;i_h<theTruth.PrimaryKaon.size();i_h++)
+      for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++)
          if(theTruth.PrimaryKaon.at(i_k).MCTruthIndex == i_t) theTruth.IsKaon[i_t] = true;
 
-      for(size_t i_k=0;i_h<theTruth.PrimaryKaonM.size();i_h++)
+      for(size_t i_k=0;i_k<theTruth.PrimaryKaonM.size();i_k++)
          if(theTruth.PrimaryKaonM.at(i_k).MCTruthIndex == i_t) theTruth.IsKaonM[i_t] = true;
 
-      for(size_t i_k=0;i_h<theTruth.PrimaryKaon0.size();i_h++)
-         if(theTruth.PrimaryKaon0.at(i_k).MCTruthIndex == i_t) theTruth.IsKaon0[i_t] = true;
+      for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++)
+	if(theTruth.PrimaryKaon.at(i_k).MCTruthIndex == i_t) theTruth.IsKaon0[i_t] = true;
 
 
       int nProducts=0;
@@ -563,37 +569,37 @@ void SubModuleG4Truth::SetFlags(){
       for(size_t i_d=0;i_d<theTruth.KaonPDecay.size();i_d++){
          if(theTruth.KaonPDecay.at(i_d).MCTruthIndex == i_t){
             nProducts++;
-            if(theTruth.Decay.at(i_d).PDG ==  -13) hasMuonP     = true;  
-            if(theTruth.Decay.at(i_d).PDG ==  -11) hasElectronP = true;
-            if(theTruth.Decay.at(i_d).PDG ==   12) hasNuE       = true;
-            if(theTruth.Decay.at(i_d).PDG ==   14) hasNuMu      = true;  
-            if(theTruth.Decay.at(i_d).PDG ==  211) hasPionP     = true;
-            if(theTruth.Decay.at(i_d).PDG == -211) hasPionM     = true;
-            if(theTruth.Decay.at(i_d).PDG ==  111) hasPion0     = true;
+            if(theTruth.KaonPDecay.at(i_d).PDG ==  -13) hasMuonP     = true;  
+            if(theTruth.KaonPDecay.at(i_d).PDG ==  -11) hasElectronP = true;
+            if(theTruth.KaonPDecay.at(i_d).PDG ==   12) hasNuE       = true;
+            if(theTruth.KaonPDecay.at(i_d).PDG ==   14) hasNuMu      = true;  
+            if(theTruth.KaonPDecay.at(i_d).PDG ==  211) hasPionP     = true;
+            if(theTruth.KaonPDecay.at(i_d).PDG == -211) hasPionM     = true;
+            if(theTruth.KaonPDecay.at(i_d).PDG ==  111) hasPion0     = true;
          }
       }
 
-      if(nKaonsPs == 1){
-	if( nProducts == 2 && hasMuonP && hasNuMu ) theTruth.IsKaonPDecay_NuMuP[i_t] = true;
-	else if( nProducts == 2 && hasPionP && hasPion0 ) theTruth.IsKaonPDecay_PiPPi0[i_t] = true;
-	else if( nProducts == 3 && hasPionP && hasPionM ) theTruth.IsKaonPDecay_2PiPPiM[i_t] = true;
-	else if( nProducts == 3 && hasElectronP && hasNuE ) theTruth.IsKaonPDecay_ENuE[i_t] = true;
-	else if( nProducts == 3 && hasPion0 && hasPionP ) theTruth.IsKaonPDecay_2PiNPiP[i_t] = true;
-	else theTruth.KaonPDecay_Others[i_t] = true;
+      if(nKaonPs == 1){
+	if( nProducts == 2 && hasMuonP && hasNuMu ) theTruth.IsKaonP_NuMuP[i_t] = true;
+	else if( nProducts == 2 && hasPionP && hasPion0 ) theTruth.IsKaonP_PiPPi0[i_t] = true;
+	else if( nProducts == 3 && hasPionP && hasPionM ) theTruth.IsKaonP_2PiPPiM[i_t] = true;
+	else if( nProducts == 3 && hasElectronP && hasNuE ) theTruth.IsKaonP_ENuE[i_t] = true;
+	else if( nProducts == 3 && hasPion0 && hasPionP ) theTruth.IsKaonP_2PiNPiP[i_t] = true;
+	else theTruth.IsKaonP_Others[i_t] = true;
 
       }
      
       //if(nHyperons == 1 && theTruth.IsLambda.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsLambdaCharged[i_t] = true;
       //if(nHyperons == 1 && theTruth.IsSigmaZero.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsSigmaZeroCharged[i_t] = true;
 
-      for(size_t i_h=0;i_k<theTruth.PrimaryHyperon.size();i_h++){
+      for(size_t i_h=0;i_h<theTruth.PrimaryHyperon.size();i_h++){
         if(theTruth.PrimaryHyperon.at(i_h).MCTruthIndex == i_t){
 	  nHyperons++;
 	  theTruth.IsHyperon[i_t] = true;
 	}
       }
    
-     
+      /*
       for(SimParticle kaon : theTruth.NeutralKaonDecayK0SL)        
         if(kaon.MCTruthIndex == i_t && kaon.PDG == 310) theTruth.IsK0S[i_t] = true;
 
@@ -607,6 +613,7 @@ void SubModuleG4Truth::SetFlags(){
         }
         if(hasPiP && hasPiM) theTruth.IsK0SCharged[i_t] = true; 
       }
+      */
         
       // If there are multiple hyperons/antihyperons or hyperons and kaons present together
       // flag as associated hyperon
@@ -620,7 +627,7 @@ void SubModuleG4Truth::SetFlags(){
    theTruth.EventHasKaonP = std::find(theTruth.IsKaonP.begin(), theTruth.IsKaonP.end(), true) != theTruth.IsKaonP.end();
    theTruth.EventHasKaonP_NuMuP = std::find(theTruth.IsKaonP_NuMuP.begin(), theTruth.IsKaonP_NuMuP.end(), true) != theTruth.IsKaonP_NuMuP.end();
    theTruth.EventHasKaonP_PiPPi0 = std::find(theTruth.IsKaonP_PiPPi0.begin(), theTruth.IsKaonP_PiPPi0.end(), true) != theTruth.IsKaonP_PiPPi0.end();
-   theTruth.EventHasKaonM = std::find(theTruth.IsKaonM.begin(), theTruth.IsKaonM.end(), true) != theTruth.IsKaonM.end()
+   theTruth.EventHasKaonM = std::find(theTruth.IsKaonM.begin(), theTruth.IsKaonM.end(), true) != theTruth.IsKaonM.end();
    theTruth.EventHasKaon0 = std::find(theTruth.IsKaon0.begin(), theTruth.IsKaon0.end(), true) != theTruth.IsKaon0.end();
 
 }

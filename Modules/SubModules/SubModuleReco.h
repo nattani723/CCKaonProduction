@@ -7,9 +7,11 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "canvas/Persistency/Common/FindManyP.h"
-#include "canvas/Persistency/Common/FindMany.h"				
+#include "canvas/Persistency/Common/FindMany.h"	
+#include "canvas/Persistency/Common/TriggerResults.h"			
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/ParameterSetRegistry.h"
 #include "cetlib_except/exception.h"
 
 #include "lardataobj/RecoBase/PFParticle.h"
@@ -67,7 +69,6 @@ struct RecoData {
    bool GoodReco = false;
    bool GoodPrimaryReco = false;
    bool GoodRecoAsShower = false;
-   bool PassCCInclusiveFilter = false;
 
 };
 
@@ -76,9 +77,9 @@ class SubModuleReco {
    public:
 
       //SubModuleReco();
-      SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
+  SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,string trackrebuiltlabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
+		string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,string showerhitassnlabel,string metadatalabel,string genlabel,
                         string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
 
       SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
@@ -89,6 +90,7 @@ class SubModuleReco {
 
       RecoData GetInfo();
       void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
+      bool ApplyNuCCInclusiveFilter(art::Event const& e);
 
      
 
@@ -100,6 +102,9 @@ class SubModuleReco {
       art::Handle<std::vector<recob::Track>> Handle_Track;
       std::vector<art::Ptr<recob::Track>> Vect_Track;
 
+      art::Handle<std::vector<recob::Track>> Handle_TrackRebuilt;
+      std::vector<art::Ptr<recob::Track>> Vect_TrackRebuilt;
+
       art::Handle<std::vector<recob::Shower>> Handle_Shower;
       std::vector<art::Ptr<recob::Shower>> Vect_Shower;
 
@@ -108,16 +113,20 @@ class SubModuleReco {
 
       RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp);
 
-      art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;
+      art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;  
       art::FindManyP<recob::Track>* Assoc_PFParticleTrack;
+      art::FindManyP<recob::Track>* Assoc_PFParticleTrackRebuilt;
       art::FindManyP<recob::Shower>* Assoc_PFParticleShower;
       art::FindManyP<larpandoraobj::PFParticleMetadata>* Assoc_PFParticleMetadata;
       art::FindManyP<recob::Hit>* Assoc_TrackHit;
+      art::FindManyP<recob::Hit>* Assoc_TrackRebuiltHit;
       art::FindManyP<recob::Hit>* Assoc_ShowerHit;
       art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* Assoc_MCParticleBacktracker;
       art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* ParticlesPerHit;
       art::FindManyP<anab::Calorimetry>* Assoc_TrackCalo;
       art::FindManyP<anab::ParticleID>* Assoc_TrackPID;
+      art::FindManyP<anab::Calorimetry>* Assoc_TrackRebuiltCalo;
+      art::FindManyP<anab::ParticleID>* Assoc_TrackRebuiltPID;
 
       searchingfornues::LLRPID llr_pid_calculator;
       searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
@@ -126,7 +135,6 @@ class SubModuleReco {
       searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
 
       SubModuleG4Truth* G4T = nullptr;
-      CaloManager CaloCalc;
       PIDManager PIDCalc;      
 
       RecoData theData;
@@ -140,7 +148,6 @@ class SubModuleReco {
       void MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
-      bool ApplyNuCCInclusiveFilter();
 
       bool IsData;
       bool DoGetPIDs=true;

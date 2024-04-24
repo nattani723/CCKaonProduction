@@ -72,6 +72,7 @@ double MergeHitPurity_1st, MergeHitPurity_2nd, MergeHitPurity_3rd;
 
 inline void SetVertex(TVector3 V);
 inline void SetTrackPositions(TVector3 Start,TVector3 End);
+inline void SetMergeCheck(std::vector<int> MergePDG, std::vector<double> MergeEnergyPurity, std::vector<double> MergeHitPurity);
 inline void Print();
 
 #ifdef __MAKE_ROOT_DICT__

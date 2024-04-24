@@ -36,6 +36,7 @@ struct GeneratorTruth {
    std::vector<std::string> CCNC;
    bool EventHasFinalStateNeutron=false;
    bool EventHasHyperon=false; 
+   bool EventHasKaon=false; 
    bool EventHasKaonP=false; 
    bool EventHasKaonM=false; 
    bool EventHasKaon0=false; 

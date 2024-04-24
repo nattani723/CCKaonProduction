@@ -78,7 +78,7 @@ class SubModuleReco {
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
-      void SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero);
+      void SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsSignal_NuMuP, std::vector<bool> IsSignal_PiPPi0);
 
       RecoData GetInfo();
       void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
@@ -106,6 +106,7 @@ class SubModuleReco {
       art::FindManyP<recob::Shower>* Assoc_PFParticleShower;
       art::FindManyP<larpandoraobj::PFParticleMetadata>* Assoc_PFParticleMetadata;
       art::FindManyP<recob::Hit>* Assoc_TrackHit;
+      art::FindManyP<recob::Hit>* Assoc_ShowerHit;
       art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* Assoc_MCParticleBacktracker;
       art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* ParticlesPerHit;
       art::FindManyP<anab::Calorimetry>* Assoc_TrackCalo;
@@ -127,6 +128,7 @@ class SubModuleReco {
 
       void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);

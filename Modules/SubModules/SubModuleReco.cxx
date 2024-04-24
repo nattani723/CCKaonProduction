@@ -303,20 +303,6 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetCalos(const art::Ptr<recob::Track> &trk,RecoParticle &P){
-
-   std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
-   std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
-   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = caloFromTrack.at(0)->CaloAlgScores();
-
-   CaloStore store = CaloCalc.GetCalos(trk,caloFromTrack,AlgScoresVec);
-   P.Track_LLR_PID = store.LLR;
-
-  
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
    std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
@@ -332,6 +318,22 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
    P.MeandEdX_Plane2 = store.MeandEdX_Plane2;
    P.MeandEdX_ThreePlane = store.MeandEdX_3Plane;
    P.Track_Bragg_PID_Kaon = store.Bragg_Kaon_3Plane;
+   P.Track_Chi2_Kaon_Plane0 = store.Chi2_Kaon.at(0);
+   P.Track_Chi2_Kaon_Plane1 = store.Chi2_Kaon.at(1);
+   P.Track_Chi2_Kaon_Plane2 = store.Chi2_Kaon.at(2);
+   P.Track_Chi2_Kaon_3Plane = store.Chi2_Kaon_3Plane;
+   P.Track_Chi2_Proton_Plane0 = store.Chi2_Proton.at(0);
+   P.Track_Chi2_Proton_Plane1 = store.Chi2_Proton.at(1);
+   P.Track_Chi2_Proton_Plane2 = store.Chi2_Proton.at(2);
+   P.Track_Chi2_Proton_3Plane = store.Chi2_Proton_3Plane;
+   P.Track_Chi2_Pion_Plane0 = store.Chi2_Pion.at(0);
+   P.Track_Chi2_Pion_Plane1 = store.Chi2_Pion.at(1);
+   P.Track_Chi2_Pion_Plane2 = store.Chi2_Pion.at(2);
+   P.Track_Chi2_Pion_3Plane = store.Chi2_Pion_3Plane;
+   P.Track_Chi2_Muon_Plane0 = store.Chi2_Muon.at(0);
+   P.Track_Chi2_Muon_Plane1 = store.Chi2_Muon.at(1);
+   P.Track_Chi2_Muon_Plane2 = store.Chi2_Muon.at(2);
+   P.Track_Chi2_Muon_3Plane = store.Chi2_Muon_3Plane;
 
 /*
    // LLR PID Calculation

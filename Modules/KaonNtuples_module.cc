@@ -175,10 +175,11 @@ private:
   std::vector<double> t_DecayVertex_Y;
   std::vector<double> t_DecayVertex_Z;
 
-  int t_NPrimaryTracks;
   int t_NPrimaryDaughters;
   int t_NPrimaryTrackDaughters;
   int t_NPrimaryShowerDaughters;
+  int t_NOtherTracks;
+  int t_NOtherShowers;
 
   //std::vector<RecoParticle> t_TrackPrimary;
   std::vector<RecoParticle> t_TrackPrimaryDaughters;
@@ -337,6 +338,8 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_NPrimaryDaughters = 0; //number of primary daughters
    t_NPrimaryTrackDaughters=0; //num of track like primary daughters
    t_NPrimaryShowerDaughters=0; //num of shower like primary daughters
+   t_NOtherTracks=0;
+   t_NOtherShowers=0;
 
    t_TrackPrimaryDaughters.clear();
    t_ShowerPrimaryDaughters.clear();
@@ -463,11 +466,12 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
       RecoData RecoD =  Reco_SM->GetInfo();   
 
-      t_NPrimaryTracks = RecoD.NPrimaryTracks;
       t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
       t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
       t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
-      t_TrackPrimary = RecoD.TrackPrimary; 
+      t_NOtherTracks = RecoD.NOtherTracks;
+      t_NOtherShowers = RecoD.NOtherShowers;
+  
       t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;
       t_ShowerPrimaryDaughters = RecoD.ShowerPrimaryDaughters;
       t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
@@ -725,6 +729,8 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("NPrimaryTracks",&t_NPrimaryTracks);
    OutputTree->Branch("NPrimaryTrackDaughters",&t_NPrimaryTrackDaughters);
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);
+   OutputTree->Branch("NOtherTracks",&t_NOtherTracks);
+   OutputTree->Branch("NOtherShowers",&t_NOtherShowers);
    
    OutputTree->Branch("TracklikePrimary","vector<RecoParticle>",&t_TrackPrimary);
    OutputTree->Branch("TracklikePrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);

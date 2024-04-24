@@ -637,6 +637,31 @@ void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool SubModuleReco::ApplyNuCCInclusiveFilter(){
+
+  // Check if event passed the NuCC inclusive filter
+  bool IsNuCCInclusive = false;
+  string process(isMC ? "OverlayFiltersPostStage2" : "DataFiltersPostStage2");
+  art::InputTag trigResInputTag("TriggerResults","",process.data()); // the last is the name of process where the filters were run
+  art::ValidHandle<art::TriggerResults> trigRes = evt.getValidHandle<art::TriggerResults>(trigResInputTag);
+	
+  fhicl::ParameterSet pset;
+  if (!fhicl::ParameterSetRegistry::get(trigRes->parameterSetID(), pset)) { throw cet::exception("PSet Not Found???"); }
+  std::vector<std::string> trigger_path_names = pset.get<std::vector<std::string> >("trigger_paths", {});
+  if (trigger_path_names.size()!=trigRes->size()) { throw cet::exception("Size mismatch???"); }
+  for (size_t itp=0;itp<trigRes->size();itp++) {
+    //cout << "Filter name " << trigger_path_names.at(itp) << " decision=" << trigRes->at(itp).accept() << endl;
+    if (trigger_path_names.at(itp)=="NuCC") {
+      IsNuCCInclusive = trigRes->at(itp).accept();
+    }
+  }
+
+  return IsNuCCInclusive;
+	
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsSignal_NuMuP, std::vector<bool> IsSignal_PiPPi0){
       
    bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end() 

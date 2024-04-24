@@ -17,7 +17,7 @@
 #include "ubana/CCKaonProduction/Headers/LLRPID_correction_lookup.h"
 #include "TVector3.h"
 
-namespace hyperon {
+namespace cckaon {
 
    //Define wire plane angles
    const double plane0_wireangle = 30*6.28/360.0;

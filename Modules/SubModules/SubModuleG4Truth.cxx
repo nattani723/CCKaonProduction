@@ -574,11 +574,11 @@ void SubModuleG4Truth::SetFlags(){
       }
 
       if(nKaonsPs == 1){
-	if( nProducts == 2 && hasMuonP && hasNuMu ) theTruth.KaonPDecay_NuMuP[i_t] = true;
-	else if( nProducts == 2 && hasPionP && hasPion0 ) theTruth.KaonPDecay_PiPPi0[i_t] = true;
-	else if( nProducts == 3 && hasPionP && hasPionM ) theTruth.KaonPDecay_2PiPPiM[i_t] = true;
-	else if( nProducts == 3 && hasElectronP && hasNuE ) theTruth.KaonPDecay_ENuE[i_t] = true;
-	else if( nProducts == 3 && hasPion0 && hasPionP ) theTruth.KaonPDecay_2PiNPiP[i_t] = true;
+	if( nProducts == 2 && hasMuonP && hasNuMu ) theTruth.IsKaonPDecay_NuMuP[i_t] = true;
+	else if( nProducts == 2 && hasPionP && hasPion0 ) theTruth.IsKaonPDecay_PiPPi0[i_t] = true;
+	else if( nProducts == 3 && hasPionP && hasPionM ) theTruth.IsKaonPDecay_2PiPPiM[i_t] = true;
+	else if( nProducts == 3 && hasElectronP && hasNuE ) theTruth.IsKaonPDecay_ENuE[i_t] = true;
+	else if( nProducts == 3 && hasPion0 && hasPionP ) theTruth.IsKaonPDecay_2PiNPiP[i_t] = true;
 	else theTruth.KaonPDecay_Others[i_t] = true;
 
       }
@@ -618,6 +618,8 @@ void SubModuleG4Truth::SetFlags(){
    theTruth.EventHasHyperon = std::find(theTruth.IsHyperon.begin(), theTruth.IsHyperon.end(), true) != theTruth.IsHyperon.end();
    theTruth.EventHasKaon = std::find(theTruth.IsKaon.begin(), theTruth.IsKaon.end(), true) != theTruth.IsKaon.end();
    theTruth.EventHasKaonP = std::find(theTruth.IsKaonP.begin(), theTruth.IsKaonP.end(), true) != theTruth.IsKaonP.end();
+   theTruth.EventHasKaonP_NuMuP = std::find(theTruth.IsKaonP_NuMuP.begin(), theTruth.IsKaonP_NuMuP.end(), true) != theTruth.IsKaonP_NuMuP.end();
+   theTruth.EventHasKaonP_PiPPi0 = std::find(theTruth.IsKaonP_PiPPi0.begin(), theTruth.IsKaonP_PiPPi0.end(), true) != theTruth.IsKaonP_PiPPi0.end();
    theTruth.EventHasKaonM = std::find(theTruth.IsKaonM.begin(), theTruth.IsKaonM.end(), true) != theTruth.IsKaonM.end()
    theTruth.EventHasKaon0 = std::find(theTruth.IsKaon0.begin(), theTruth.IsKaon0.end(), true) != theTruth.IsKaon0.end();
 

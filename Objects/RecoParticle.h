@@ -64,6 +64,11 @@ double TrackTrueLength;
 int TrackTrueOrigin; // 0 = neutrino , 1 = primary , 2 = hyperon decay, 3 = other, 4 = Kaon decay, 5 = Sigma0 decay, 6 = K0S/K0L, 7 = K0S/K0L decay
 double TrackTruthPurity;
 
+// Merge Check
+int MergePDG_1st, MergePDG_2nd, MergePDG_3rd;
+double MergeEnergyPurity_1st, MergeEnergyPurity_2nd, MergeEnergyPurity_3rd;
+double MergeHitPurity_1st, MergeHitPurity_2nd, MergeHitPurity_3rd;
+
 inline void SetVertex(TVector3 V);
 inline void SetTrackPositions(TVector3 Start,TVector3 End);
 inline void Print();
@@ -93,6 +98,22 @@ inline void RecoParticle::SetTrackPositions(TVector3 Start,TVector3 End){
    TrackEndY = End.Y();
    TrackEndZ = End.Z();
 
+}
+
+inline void RecoParticle::SetMergeCheck(std::vector<int> MergePDG, std::vector<double> MergeEnergyPurity, std::vector<double> MergeHitPurity){
+   
+      MergePDG_1st = MergePDG.at(0);
+      MergePDG_2nd = MergePDG.at(1);
+      MergePDG_3rd = MergePDG.at(2);
+
+      MergeEnergyPurity_1st = MergeEnergyPurity.at(0);
+      MergeEnergyPurity_2nd = MergeEnergyPurity.at(1);
+      MergeEnergyPurity_3rd = MergeEnergyPurity.at(2);
+
+      MergeHitPurity_1st = MergeHitPurity.at(0);
+      MergeHitPurity_2nd = MergeHitPurity.at(1);
+      MergeHitPurity_3rd = MergeHitPurity.at(2);
+   
 }
 
 inline void RecoParticle::Print(){

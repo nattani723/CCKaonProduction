@@ -125,7 +125,7 @@ void SubModuleReco::PrepareInfo(){
          P.InNuSlice = true;         
       }
       else if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){ // has daughter track
-         P.Parentage = 3; 
+         P.Parentage = 2; 
          P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
       }
 

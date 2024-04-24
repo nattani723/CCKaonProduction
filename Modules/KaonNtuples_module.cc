@@ -106,6 +106,8 @@ private:
   bool t_EventHasHyperon;
   bool t_EventHasKaon;
   bool t_EventHasKaonP;
+  bool t_EventHasKaonP_NuMuP;
+  bool t_EventHasKaonP_PiPPi0;
   bool t_EventHasKaonM;
   bool t_EventHasKaon0;
   // bool t_EventHasK0S;
@@ -298,10 +300,12 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_IsSignal.clear();
    t_IsSignal_NuMuP.clear();
    t_IsSignal_PiPPi0.clear();
-   t_EventHasKaonPScatte = false;
+   t_EventHasKaonPScatter = false;
    t_EventHasHyperon = false;
    t_EventHasKaon = false;
    t_EventHasKaonP = false;
+   t_EventHasKaonP_NuMuP = false;
+   t_EventHasKaonP_PiPPi0 = false;
    t_EventHasKaonM = false;
    t_EventHasKaon0 = false;
    t_GoodReco = false;
@@ -403,6 +407,8 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       t_EventHasHyperon = G4T.EventHasHyperon;
       t_EventHasKaon = G4T.EventHasKaon;
       t_EventHasKaonP = G4T.EventHasKaonP;
+      t_EventHasKaonP_NuMuP = G4T.EventHasKaonP;
+      t_EventHasKaonP_PiPPi0 = G4T.EventHasKaonP;
       t_EventHasKaonM = G4T.EventHasKaonM;
       t_EventHasKaon0 = G4T.EventHasKaon0;
 
@@ -688,6 +694,8 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("EventHasNeutronScatter",&t_EventHasNeutronScatter);
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
    OutputTree->Branch("EventHasKaonP",&t_EventHasKaonP);
+   OutputTree->Branch("EventHasKaonP_NuMuP",&t_EventHasKaonP_NuMuP);
+   OutputTree->Branch("EventHasKaonP_PiPPi0",&t_EventHasKaonP_PiPPi0);
    OutputTree->Branch("EventHasKaonM",&t_EventHasKaonM);
    OutputTree->Branch("EventHasKaon0",&t_EventHasKaon0);
 

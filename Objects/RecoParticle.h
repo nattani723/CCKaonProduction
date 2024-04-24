@@ -23,6 +23,7 @@ RecoParticle(){}
 
 int Index;
 bool InNuSlice = false;
+bool IsRebuilt = false;
 
 // General reco info
 int PDG; // Pandora PDG code (11 or 13)

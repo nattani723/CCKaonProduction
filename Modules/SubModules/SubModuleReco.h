@@ -67,6 +67,7 @@ struct RecoData {
    bool GoodReco = false;
    bool GoodPrimaryReco = false;
    bool GoodRecoAsShower = false;
+   bool PassCCInclusiveFilter = false;
 
 };
 
@@ -139,6 +140,7 @@ class SubModuleReco {
       void MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      bool ApplyNuCCInclusiveFilter();
 
       bool IsData;
       bool DoGetPIDs=true;

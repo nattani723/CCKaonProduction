@@ -8,7 +8,7 @@
 // Functions for calculating track wiggliness, created by Andy Smith (U of Cambridge)
 // https://github.com/a-d-smith/ubcc1pi/blob/3a0636df2e2d11581608857e862c17b5bcbfbc10/ubcc1pi/Helpers/RecoHelper.cxx
 
-namespace hyperon {
+namespace cckaon {
 
 inline std::vector<size_t> GetValidPoints(const art::Ptr<recob::Track> &track){
 

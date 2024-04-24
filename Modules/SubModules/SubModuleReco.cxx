@@ -194,6 +194,9 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
 
    if(pfpTracks.size() == 1){
       GetTrackData(pfp,P);
+      GetVertexData(pfp,P);
+   }
+   if(pfpShowers.size() == 1){
       GetShowerData(pfp,P);
       GetVertexData(pfp,P);
    }

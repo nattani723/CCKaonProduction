@@ -34,6 +34,8 @@ namespace cckaon {
     bool EventHasHyperon = false;
     bool EventHasKaon = false;
     bool EventHasKaonP = false;
+    bool EventHasKaonP_NuMuP = false;
+    bool EventHasKaonP_PiPPi0 = false;
     bool EventHasKaonM = false;
     bool EventHasKaon0 = false;
     

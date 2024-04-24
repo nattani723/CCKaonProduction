@@ -110,6 +110,8 @@ private:
   bool t_EventHasKaon0;
   // bool t_EventHasK0S;
   bool t_GoodReco;
+  bool t_GoodPrimaryReco;
+  bool t_GoodRecoAsShower;
   
   // Flags applying to each MCTruth
   std::vector<bool> t_InActiveTPC;
@@ -176,7 +178,7 @@ private:
   int t_NPrimaryTrackDaughters;
   int t_NPrimaryShowerDaughters;
 
-  std::vector<RecoParticle> t_TrackPrimary;
+  //std::vector<RecoParticle> t_TrackPrimary;
   std::vector<RecoParticle> t_TrackPrimaryDaughters;
   std::vector<RecoParticle> t_ShowerPrimaryDaughters;   
   

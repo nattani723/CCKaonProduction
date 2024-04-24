@@ -179,11 +179,15 @@ private:
   int t_NPrimaryTrackDaughters;
   int t_NPrimaryShowerDaughters;
   int t_NOtherTracks;
+  int t_NOtherRebuiltTracks;
   int t_NOtherShowers;
 
   //std::vector<RecoParticle> t_TrackPrimary;
   std::vector<RecoParticle> t_TrackPrimaryDaughters;
-  std::vector<RecoParticle> t_ShowerPrimaryDaughters;   
+  std::vector<RecoParticle> t_ShowerPrimaryDaughters;
+  std::vector<RecoParticle> t_TrackOthers;
+  std::vector<RecoParticle> t_TrackRebuiltOthers;
+  std::vector<RecoParticle> t_ShowerOthers;
   
   TVector3 t_RecoPrimaryVertex;
   
@@ -338,11 +342,15 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_NPrimaryDaughters = 0; //number of primary daughters
    t_NPrimaryTrackDaughters=0; //num of track like primary daughters
    t_NPrimaryShowerDaughters=0; //num of shower like primary daughters
+   t_NOtherRebuiltTracks=0;
    t_NOtherTracks=0;
    t_NOtherShowers=0;
 
    t_TrackPrimaryDaughters.clear();
    t_ShowerPrimaryDaughters.clear();
+   t_TrackOthers.clear();
+   t_TrackRebuiltOthers.clear();
+   t_ShowerOthers.clear();
 
    t_RecoPrimaryVertex.SetXYZ(-1000,-1000,-1000); //position of reco'd primary vertex
 
@@ -470,10 +478,14 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
       t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
       t_NOtherTracks = RecoD.NOtherTracks;
+      t_NOtherRebuiltTracks = RecoD.NOtherTracks;
       t_NOtherShowers = RecoD.NOtherShowers;
   
       t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;
       t_ShowerPrimaryDaughters = RecoD.ShowerPrimaryDaughters;
+      t_TrackOthers = RecoD.TrackOthers;
+      t_TrackRebuiltOthers = RecoD.TrackRebuiltOthers;
+      t_ShowerOthers = RecoD.ShowerOthers;
       t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
       t_GoodReco = RecoD.GoodReco;
 
@@ -730,11 +742,14 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("NPrimaryTrackDaughters",&t_NPrimaryTrackDaughters);
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);
    OutputTree->Branch("NOtherTracks",&t_NOtherTracks);
+   OutputTree->Branch("NOtherRebuiltTracks",&t_NOtherRebuiltTracks);
    OutputTree->Branch("NOtherShowers",&t_NOtherShowers);
    
-   OutputTree->Branch("TracklikePrimary","vector<RecoParticle>",&t_TrackPrimary);
    OutputTree->Branch("TracklikePrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);
    OutputTree->Branch("ShowerlikePrimaryDaughters","vector<RecoParticle>",&t_ShowerPrimaryDaughters);
+   OutputTree->Branch("TrackOthers","vector<RecoParticle>",&t_TrackOthers);
+   OutputTree->Branch("TrackRebuiltOthers","vector<RecoParticle>",&t_TrackRebuiltOthers);
+   OutputTree->Branch("ShowerOthers","vector<RecoParticle>",&t_ShowerOthers);
    OutputTree->Branch("RepassTracklikePrimaryDaughters","vector<RecoParticle>",&t_RepassTrackPrimaryDaughters);
    OutputTree->Branch("RepassShowerlikePrimaryDaughters","vector<RecoParticle>",&t_RepassShowerPrimaryDaughters);
    

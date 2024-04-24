@@ -23,6 +23,7 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("HitModuleLabel"),
                   pset.get<std::string>("HitTruthAssnLabel"),
                   pset.get<std::string>("TrackHitAssnLabel"),
+                  pset.get<std::string>("ShowerHitAssnLabel"),
                   pset.get<std::string>("MetadataModuleLabel"),
                   pset.get<std::string>("GeneratorModuleLabel"),
                   pset.get<std::string>("G4ModuleLabel"),
@@ -69,6 +70,7 @@ ParticleGunMode(particlegunmode)
    Assoc_PFParticleShower = new art::FindManyP<recob::Shower>(Vect_PFParticle,e,showerlabel);    
    Assoc_PFParticleMetadata = new art::FindManyP<larpandoraobj::PFParticleMetadata>(Vect_PFParticle,e,metadatalabel);   
    Assoc_TrackHit = new  art::FindManyP<recob::Hit>(Vect_Track,e,trackhitassnlabel);
+   Assoc_ShowerHit = new  art::FindManyP<recob::Hit>(Vect_Shower,e,showerhitassnlabel);
    ParticlesPerHit = new art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>(Handle_Hit,e,hittruthassnlabel);
 
    if(DoGetPIDs){
@@ -192,6 +194,7 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
 
    if(pfpTracks.size() == 1){
       GetTrackData(pfp,P);
+      GetShowerData(pfp,P);
       GetVertexData(pfp,P);
    }
 
@@ -234,7 +237,34 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
 
    if(!IsData) TruthMatch(trk,P);
 
+   std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
+   if(!IsData) MergeCheck(hits,P);
+
    if(DoGetPIDs) GetPIDs(trk,P);
+   
+   theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
+   P.Index = theData.TrackStarts.size() - 1;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
+
+   std::vector<art::Ptr<recob::Shower>> pfpShowers = Assoc_PFParticleShower->at(pfp.key());
+
+   if(pfpShowers.size() != 1) return;
+
+   art::Ptr<recob::Track> shw = pfpShowers.at(0);
+
+   // Sets track length/position related variables
+   SetTrackVariables(P,shw);
+
+   //if(!IsData) TruthMatch(trk,P);
+
+   std::vector<art::Ptr<recob::Hit>> hits = Assoc_ShowerHit->at(trk.key());
+   if(!IsData) MergeCheck(hits,P);
+
+   //if(DoGetPIDs) GetPIDs(trk,P);
    
    theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
    P.Index = theData.TrackStarts.size() - 1;
@@ -560,7 +590,7 @@ void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero){
+void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsSignal_NuMuP, std::vector<bool> IsSignal_PiPPi0){
       
    bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end() 
                       || std::find(IsSignal_NuMuP.begin(),IsSignal_NuMuP.end(),true) == IsSignal_NuMuP.end()

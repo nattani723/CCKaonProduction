@@ -21,7 +21,7 @@
 
 // Helper functions used to transform larsoft objects into SimParticle and RecoParticle
 
-namespace hyperon {
+namespace cckaon {
 
 inline SimParticle MakeSimParticle(simb::MCParticle Part){
 

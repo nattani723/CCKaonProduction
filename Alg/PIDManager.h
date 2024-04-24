@@ -44,6 +44,15 @@ namespace hyperon {
       double Bragg_Kaon_Plane2;    
       double Bragg_Kaon_3Plane;
 
+      std::vector<float> Chi2_Kaon;
+      std::vector<float> Chi2_Proton;
+      std::vector<float> Chi2_Pion;
+      std::vector<float> Chi2_Muon;
+      double Chi2_Kaon_3Plane;
+      double Chi2_Proton_3Plane;
+      double Chi2_Pion_3Plane;
+      double Chi2_Muon_3Plane;
+
       std::vector<float> dEdX_Plane0;
       std::vector<float> ResidualRange_Plane0;
       std::vector<float> Pitch_Plane0;
@@ -70,6 +79,7 @@ namespace hyperon {
          void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
+         void Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
          PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
                
          double PlaneWeight(TVector3 dir,int i_pl);

@@ -175,6 +175,7 @@ private:
   std::vector<double> t_DecayVertex_Y;
   std::vector<double> t_DecayVertex_Z;
 
+  bool t_PassNuCCInclusiveFilter;
   int t_NPrimaryDaughters;
   int t_NPrimaryTrackDaughters;
   int t_NPrimaryShowerDaughters;
@@ -339,6 +340,7 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    t_DecayVertex_Y.clear();
    t_DecayVertex_Z.clear();
 
+   t_PassNuCCInclusiveFilter = false;
    t_NPrimaryDaughters = 0; //number of primary daughters
    t_NPrimaryTrackDaughters=0; //num of track like primary daughters
    t_NPrimaryShowerDaughters=0; //num of shower like primary daughters
@@ -474,6 +476,7 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
       RecoData RecoD =  Reco_SM->GetInfo();   
 
+      t_PassNuCCInclusiveFilter = RecoD.ApplyNuCCInclusiveFilter();
       t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
       t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
       t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
@@ -738,6 +741,7 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("DecayVertex_Z",&t_DecayVertex_Z);
 
    OutputTree->Branch("RecoPrimaryVertex","TVector3",&t_RecoPrimaryVertex);
+   OutputTree->Branch("PassNuCCInclusiveFilter",t_PassNuCCInclusiveFilter);
    OutputTree->Branch("NPrimaryTracks",&t_NPrimaryTracks);
    OutputTree->Branch("NPrimaryTrackDaughters",&t_NPrimaryTrackDaughters);
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);

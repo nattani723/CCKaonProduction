@@ -40,9 +40,6 @@
 #include "ubana/CCKaonProduction/Objects/RecoParticle.h"
 #include "ubana/CCKaonProduction/Objects/Helpers.h"
 
-//algorithms
-#include "ubana/CCKaonProduction/Alg/ConnectednessHelper.h"
-
 //submodules
 #include "ubana/CCKaonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
 #include "ubana/CCKaonProduction/Modules/SubModules/SubModuleG4Truth.h"
@@ -53,7 +50,7 @@ namespace cckaon {
 }
 
 
-class kaon::KaonNtuples : public art::EDAnalyzer {
+class cckaon::KaonNtuples : public art::EDAnalyzer {
 public:
   explicit KaonNtuples(fhicl::ParameterSet const& p);
   // The compiler-generated destructor is fine for non-base
@@ -132,20 +129,6 @@ private:
   std::vector<bool> t_IsSignal;
   std::vector<bool> t_IsSignal_NuMuP;
   std::vector<bool> t_IsSignal_PiPPi0;
-  /*
-      std::vector<bool> t_InActiveTPC;
-      std::vector<bool> t_IsHyperon;
-      std::vector<bool> t_IsLambda;
-      std::vector<bool> t_IsLambdaCharged;
-      std::vector<bool> t_IsSigmaZero; 		
-      std::vector<bool> t_IsSigmaZeroCharged; 		
-      std::vector<bool> t_IsAssociatedHyperon;
-      std::vector<bool> t_IsSignal;
-      std::vector<bool> t_IsSignalSigmaZero;
-      std::vector<bool> t_IsKaon;
-      std::vector<bool> t_IsK0S;
-      std::vector<bool> t_IsK0SCharged;
-  */
 
   bool t_EventHasFinalStateNeutron;
 
@@ -250,7 +233,6 @@ cckaon::KaonNtuples::KaonNtuples(fhicl::ParameterSet const& p)
    f_GetGeneratorInfo(p.get<bool>("GetGeneratorInfo",true)),   
    f_GetG4Info(p.get<bool>("GetG4Info",true)),   
    f_GetRecoInfo(p.get<bool>("GetRecoInfo",true)),   
-   //f_GetConnInfo(p.get<bool>("GetConnInfo",true)),   
    f_Generator(p.get<fhicl::ParameterSet>("Generator")),
    f_G4(p.get<fhicl::ParameterSet>("Geant4")),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
@@ -260,19 +242,12 @@ cckaon::KaonNtuples::KaonNtuples(fhicl::ParameterSet const& p)
    f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
    f_ParticleGun(p.get<bool>("ParticleGun",false)),
    f_IsData(p.get<bool>("IsData")),
-   f_Debug(p.get<bool>("Debug",false)),
-   Conn_Helper(p.get<bool>("DrawConnectedness",false))   // ,
+   f_Debug(p.get<bool>("Debug",false))
 {
    if(f_WeightLabels.size()){
       std::cout << "Getting weights from data products with tags:" << std::endl;
       for(size_t i=0;i<f_WeightLabels.size();i++) std::cout << f_WeightLabels.at(i) << std::endl;
    }
-
-   /*
-   if(f_Reco.get<bool>("IncludeCosmics",false) && f_GetConnInfo)
-      std::cout << std::endl << "HyperonNTuples WARNING: Requesting connectedness information with cosmics included. This will take a very long time." << std::endl
-                << "Set GetConnInfo fhicl parameter to false disable connectedness" << std::endl << std::endl;
-   */
       
 }
 
@@ -428,14 +403,14 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
       t_Weight *= G4T.Weight;
 
       t_Lepton = G4T.Lepton;
-      t_PrimaryHyperon = G4T.Hyperon;
+      t_PrimaryHyperon = G4T.PrimaryHyperon;
       t_PrimaryNucleon = G4T.PrimaryNucleon;
       t_PrimaryPion = G4T.PrimaryPion;
       t_PrimaryKaon = G4T.PrimaryKaon;
       t_PrimaryKaonP = G4T.PrimaryKaonP;
       t_PrimaryKaonP = G4T.PrimaryKaonM;
       t_PrimaryNucleus = G4T.PrimaryNucleus;
-      t_HyperonDecay = G4T.Decay;
+      t_HyperonDecay = G4T.HyperonDecay;
       t_KaonPDecay = G4T.KaonPDecay;
       t_KaonPDecay_NuMuP = G4T.KaonPDecay_NuMuP;
       t_KaonPDecay_PiPPi0 = G4T.KaonPDecay_PiPPi0;
@@ -473,10 +448,10 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
 
       SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco,f_ParticleGun);
       Reco_SM->PrepareInfo();
-      Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
+      Reco_SM->SetIndices(t_IsSignal,t_IsSignal_NuMuP,t_IsSignal_PiPPi0);
       RecoData RecoD =  Reco_SM->GetInfo();   
 
-      t_PassNuCCInclusiveFilter = RecoD.ApplyNuCCInclusiveFilter();
+      t_PassNuCCInclusiveFilter = Reco_SM->ApplyNuCCInclusiveFilter(e);
       t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
       t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
       t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
@@ -703,15 +678,23 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("IsKaonP","vector<bool>",&t_IsKaonP);
    OutputTree->Branch("IsKaonP_NuMuP","vector<bool>",&t_IsKaonP_NuMuP);
    OutputTree->Branch("IsKaonP_PiPPi0","vector<bool>",&t_IsKaonP_PiPPi0);
+   OutputTree->Branch("IsKaonP_2PiPPiM","vector<bool>",&t_IsKaonP_2PiPPiM);
+   OutputTree->Branch("IsKaonP_ENuE","vector<bool>",&t_IsKaonP_ENuE);
+   OutputTree->Branch("IsKaonP_2PiNPiP","vector<bool>",&t_IsKaonP_2PiNPiP);
+   OutputTree->Branch("IsKaonP_Others","vector<bool>",&t_IsKaonP_Others);
    OutputTree->Branch("IsKaonM","vector<bool>",&t_IsKaonM);
    OutputTree->Branch("IsKaon0","vector<bool>",&t_IsKaon0);
+   OutputTree->Branch("IsAssociatedKaonP","vector<bool>",&t_IsAssociatedKaonP);
    OutputTree->Branch("IsSignal","vector<bool>",&t_IsSignal); 
    OutputTree->Branch("IsSignal_NuMuP","vector<bool>",&t_IsSignal_NuMuP); 
    OutputTree->Branch("IsSignal_PiPPi0","vector<bool>",&t_IsSignal_PiPPi0); 
    OutputTree->Branch("GoodReco",&t_GoodReco);
+   OutputTree->Branch("GoodPrimaryReco",&t_GoodPrimaryReco);
+   OutputTree->Branch("GoodRecoAsShower",&t_GoodRecoAsShower);
 
-   OutputTree->Branch("EventHasNeutronScatter",&t_EventHasNeutronScatter);
+   OutputTree->Branch("EventHasKaonPScatter",&t_EventHasKaonPScatter);
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
+   OutputTree->Branch("EventHasKaon",&t_EventHasKaon);
    OutputTree->Branch("EventHasKaonP",&t_EventHasKaonP);
    OutputTree->Branch("EventHasKaonP_NuMuP",&t_EventHasKaonP_NuMuP);
    OutputTree->Branch("EventHasKaonP_PiPPi0",&t_EventHasKaonP_PiPPi0);
@@ -730,6 +713,8 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("KaonPDecay","vector<SimParticle>",&t_KaonPDecay);
    OutputTree->Branch("KaonPDecay_NuMuP","vector<SimParticle>",&t_KaonPDecay_NuMuP);
    OutputTree->Branch("KaonPDecay_PiPPi0","vector<SimParticle>",&t_KaonPDecay_PiPPi0);
+   OutputTree->Branch("KaonMDecay","vector<SimParticle>",&t_KaonMDecay);
+   OutputTree->Branch("Kaon0Decay","vector<SimParticle>",&t_Kaon0Decay);
    OutputTree->Branch("NeutralKaonDecayK0SL","vector<SimParticle>",&t_NeutralKaonDecayK0SL);
 
    OutputTree->Branch("TruePrimaryVertex_X",&t_TruePrimaryVertex_X);
@@ -742,7 +727,7 @@ void cckaon::KaonNtuples::beginJob(){
 
    OutputTree->Branch("RecoPrimaryVertex","TVector3",&t_RecoPrimaryVertex);
    OutputTree->Branch("PassNuCCInclusiveFilter",t_PassNuCCInclusiveFilter);
-   OutputTree->Branch("NPrimaryTracks",&t_NPrimaryTracks);
+   OutputTree->Branch("NPrimaryDaughters",&t_NPrimaryDaughters);
    OutputTree->Branch("NPrimaryTrackDaughters",&t_NPrimaryTrackDaughters);
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);
    OutputTree->Branch("NOtherTracks",&t_NOtherTracks);
@@ -754,8 +739,6 @@ void cckaon::KaonNtuples::beginJob(){
    OutputTree->Branch("TrackOthers","vector<RecoParticle>",&t_TrackOthers);
    OutputTree->Branch("TrackRebuiltOthers","vector<RecoParticle>",&t_TrackRebuiltOthers);
    OutputTree->Branch("ShowerOthers","vector<RecoParticle>",&t_ShowerOthers);
-   OutputTree->Branch("RepassTracklikePrimaryDaughters","vector<RecoParticle>",&t_RepassTrackPrimaryDaughters);
-   OutputTree->Branch("RepassShowerlikePrimaryDaughters","vector<RecoParticle>",&t_RepassShowerPrimaryDaughters);
    
    //OutputTree->Branch("SysDials",&t_SysDials);
    //OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);

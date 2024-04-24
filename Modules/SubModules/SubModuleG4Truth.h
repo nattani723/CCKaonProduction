@@ -63,6 +63,7 @@ namespace cckaon {
     std::vector<SimParticle> PrimaryKaon;
     std::vector<SimParticle> PrimaryKaonP;
     std::vector<SimParticle> PrimaryKaonM;
+    std::vector<SimParticle> PrimaryKaon0;
     std::vector<SimParticle> PrimaryNucleus;
     std::vector<SimParticle> HyperonDecay;
     std::vector<SimParticle> KaonPDecay;
@@ -101,10 +102,8 @@ namespace cckaon {
     void GetKaon0Decay();
     void GetNeutralKaonDecay();
     void GetHyperonDecay();
-    void GetSigmaZeroDecay();
-    void GetNeutralKaonDecay();
     bool FindKaonPScatter();
-    int GetOrigin(int trackid);
+    int  GetOrigin(int trackid);
     void MCTruthMatch(SimParticle &P);
     void MCTruthMatch(SimParticle &P,int trackid);
     void SetFlags();

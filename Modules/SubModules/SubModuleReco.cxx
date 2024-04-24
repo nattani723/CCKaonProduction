@@ -37,9 +37,9 @@ SubModuleReco(e,isdata,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
+SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel, string trackrebuiltlabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
+			     string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,string showerhitassnlabel,string metadatalabel,string genlabel,
                                      string g4label,bool dogetpids,bool includecosmics,bool particlegunmode) :
 PIDCalc(),
 DoGetPIDs(dogetpids),
@@ -55,6 +55,9 @@ ParticleGunMode(particlegunmode)
    if(!e.getByLabel(tracklabel,Handle_Track)) 
       throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
 
+   if(!e.getByLabel(trackrebuiltlabel,Handle_TrackRebuilt)) 
+      throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
+
    if(!e.getByLabel(showerlabel,Handle_Shower)) 
       throw cet::exception("SubModuleReco") << "No Shower Data Products Found!" << std::endl;
 
@@ -63,7 +66,7 @@ ParticleGunMode(particlegunmode)
 
    art::fill_ptr_vector(Vect_PFParticle,Handle_PFParticle);
    art::fill_ptr_vector(Vect_Track,Handle_Track);
-   art::fill_ptr_vector(Vect_TrackRebuilt,Handle_Track);
+   art::fill_ptr_vector(Vect_TrackRebuilt,Handle_TrackRebuilt);
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
@@ -145,7 +148,7 @@ void SubModuleReco::PrepareInfo(){
             m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
 	 }
 	 else{
-	    if(P.IsRebuilt=true) theData.TrackRebuiltOthers.push_back(P);
+	    if(P.IsRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
 	    else theData.TrackOthers.push_back(P);
 	 }
       }
@@ -259,18 +262,22 @@ void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoPa
 
 void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
-   if(P.IsRebuilt=true){
-	std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrackRebuilt->at(pfp.key());
-	std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackRebuiltHit->at(trk.key());
+  std::vector<art::Ptr<recob::Track>> pfpTracks;
+  std::vector<art::Ptr<recob::Hit>> hits;
+  art::Ptr<recob::Track> trk;
+
+   if(P.IsRebuilt==true){
+     pfpTracks = Assoc_PFParticleTrackRebuilt->at(pfp.key());
+     trk = pfpTracks.at(0);
+     hits = Assoc_TrackRebuiltHit->at(trk.key());
    }
    else{
-	std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
-	std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
+     pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
+     trk = pfpTracks.at(0); 
+     hits = Assoc_TrackHit->at(trk.key());
    }
 
    if(pfpTracks.size() != 1) return;
-
-   art::Ptr<recob::Track> trk = pfpTracks.at(0);
 
    // Sets track length/position related variables
    SetTrackVariables(P,trk);
@@ -293,28 +300,29 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 
    if(pfpShowers.size() != 1) return;
 
-   art::Ptr<recob::Track> shw = pfpShowers.at(0);
+   art::Ptr<recob::Shower> shw = pfpShowers.at(0);
 
    // Sets track length/position related variables
-   SetTrackVariables(P,shw);
+   //SetTrackVariables(P,shw);
 
    //if(!IsData) TruthMatch(trk,P);
 
-   std::vector<art::Ptr<recob::Hit>> hits = Assoc_ShowerHit->at(trk.key());
+   std::vector<art::Ptr<recob::Hit>> hits = Assoc_ShowerHit->at(shw.key());
    if(!IsData) MergeCheck(hits,P);
 
    //if(DoGetPIDs) GetPIDs(trk,P);
    
-   theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
-   P.Index = theData.TrackStarts.size() - 1;
+   //theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
+   //P.Index = theData.TrackStarts.size() - 1;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
-  if(P.IsRebuilt=true) std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackRebuiltHit->at(trk.key());
-  else std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
+  std::vector<art::Ptr<recob::Hit>> hits;
+  if(P.IsRebuilt==true) hits = Assoc_TrackRebuiltHit->at(trk.key());
+  else hits = Assoc_TrackHit->at(trk.key());
 
    std::unordered_map<int,double>  trkide;
    int maxhits=-1;
@@ -374,7 +382,7 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P){
-{
+
 
   std::map<int, double> trkide;
   std::map<int, double> trkidhit;
@@ -393,9 +401,9 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
 
       particle_vec.clear();
       match_vec.clear();
-      particles_per_hit.get(hit.key(), particle_vec, match_vec);
+      ParticlesPerHit->get(hits[i_hit].key(), particle_vec, match_vec);
 
-      for(size_t i_particle=0;i_particle<particleVec.size();++i_particle){
+      for(size_t i_p=0;i_p<particle_vec.size();++i_p){ 
 
          int trackID = particle_vec[i_p]->TrackId();
          trkide[trackID] += match_vec[i_p]->energy;
@@ -445,44 +453,47 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
     pdge[ trkidpdg[ide.first] ] = ide.second;
     pdghit[ trkidpdg[ide.first] ] = trkidhit[ide.first];
   }
-
+ 
   // Output data
   std::vector<std::pair<int, double>> vec_pdge(pdge.begin(), pdge.end());
   std::vector<std::pair<int, double>> vec_pdghit(pdghit.begin(), pdghit.end());
-
-    std::sort(vec_pdge.begin(), vec_pdge.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-        return a.second > b.second;  // Descending order
+  
+  std::sort(vec_pdge.begin(), vec_pdge.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+      return a.second > b.second;  // Descending order
     });
-
-    std::sort(vec_pdghit.begin(), vec_pdghit.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-        return a.second > b.second;  // Descending order
+  
+  std::sort(vec_pdghit.begin(), vec_pdghit.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+      return a.second > b.second;  // Descending order
     });
-
+  
   std::vector<int> MergePDG(3);
   std::vector<double> MergeEnergyPurity(3);
   std::vector<double> MergeHitPurity(3);
 
-  for(int it = 0; it < 3 && it < vec_pdge.size(); it++) {
-      MergePDG[it] = vec_pdge[it].first;
-      MergeEnergyPurity[it] = vec_pdge[it].second / totalenergy;
-      MergeHitPurity[it] = vec_pdghit[it].second / hits.size();
+  for(int it = 0; it < 3; it++) {
+    MergePDG[it] = vec_pdge[it].first;
+    MergeEnergyPurity[it] = vec_pdge[it].second / totalenergy;
+    MergeHitPurity[it] = vec_pdghit[it].second / hits.size();
   }
 
   P.SetMergeCheck(MergePDG, MergeEnergyPurity, MergeHitPurity);
-
-}
+  
+ }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
-   if(P.IsRebuilt=true){
-	std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackRebuiltCalo->at(trk.key());
-   	std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackRebuiltPID->at(trk.key());
+  std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack;
+  std::vector<art::Ptr<anab::ParticleID>> trackPID;
+
+   if(P.IsRebuilt==true){
+	caloFromTrack = Assoc_TrackRebuiltCalo->at(trk.key());
+   	trackPID = Assoc_TrackRebuiltPID->at(trk.key());
    }
    else{
-	std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
-   	std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
+	caloFromTrack = Assoc_TrackCalo->at(trk.key());
+   	trackPID = Assoc_TrackPID->at(trk.key());
    }
 
    std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
@@ -637,16 +648,16 @@ void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool SubModuleReco::ApplyNuCCInclusiveFilter(){
+bool SubModuleReco::ApplyNuCCInclusiveFilter(art::Event const& e){
 
   // Check if event passed the NuCC inclusive filter
   bool IsNuCCInclusive = false;
-  string process(isMC ? "OverlayFiltersPostStage2" : "DataFiltersPostStage2");
+  string process(!IsData ? "OverlayFiltersPostStage2" : "DataFiltersPostStage2");
   art::InputTag trigResInputTag("TriggerResults","",process.data()); // the last is the name of process where the filters were run
-  art::ValidHandle<art::TriggerResults> trigRes = evt.getValidHandle<art::TriggerResults>(trigResInputTag);
+  art::ValidHandle<art::TriggerResults> trigRes = e.getValidHandle<art::TriggerResults>(trigResInputTag);
 	
   fhicl::ParameterSet pset;
-  if (!fhicl::ParameterSetRegistry::get(trigRes->parameterSetID(), pset)) { throw cet::exception("PSet Not Found???"); }
+  //if (!fhicl::ParameterSetRegistry::get(trigRes->parameterSetID(), pset)) { throw cet::exception("PSet Not Found???"); }
   std::vector<std::string> trigger_path_names = pset.get<std::vector<std::string> >("trigger_paths", {});
   if (trigger_path_names.size()!=trigRes->size()) { throw cet::exception("Size mismatch???"); }
   for (size_t itp=0;itp<trigRes->size();itp++) {
@@ -669,7 +680,7 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
                       || std::find(IsSignal_PiPPi0.begin(),IsSignal_PiPPi0.end(),true) == IsSignal_PiPPi0.end();
 
    bool found_muon=false, found_kaon=false, found_decaymuon=false, found_decaypion=false;
-   bool found_muon_as_shower=false, found_kaon_as_shower=false, found_decaymuon_as_shower=false, found_decaypion_as_shower=false;
+   bool found_kaon_as_shower=false, found_decaymuon_as_shower=false, found_decaypion_as_shower=false;
 
    for(size_t i_tr=0;i_tr<theData.TrackPrimaryDaughters.size();i_tr++){
 
@@ -685,12 +696,12 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
          found_kaon = true; 
       }
 
-      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && (P.TrackTrueOrigin == 2 || P.TrackTrueOrigin == 3)){
          theData.TrueDecayMuonIndex = P.Index;
          found_decaymuon = true;
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && (P.TrackTrueOrigin == 2 || P.TrackTrueOrigin == 3)){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }
@@ -698,24 +709,26 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
 
    for(size_t i_sh=0;i_sh<theData.ShowerPrimaryDaughters.size();i_sh++){
 
-      RecoParticle P = theData.TrackPrimaryDaughters.at(i_tr);
+      RecoParticle P = theData.TrackPrimaryDaughters.at(i_sh);
 
+      /*
       if(!found_muon && abs(P.TrackTruePDG) == 13 && P.TrackTrueOrigin == 1){ 
          theData.TrueMuonIndex = P.Index;
          found_muon_as_shower = true; 
       }
+      */
 
       if(!found_kaon && abs(P.TrackTruePDG) == 321 && P.TrackTrueOrigin == 1){ 
          theData.TrueKaonIndex = P.Index;
          found_kaon_as_shower = true; 
       }
 
-      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && (P.TrackTrueOrigin == 2 || P.TrackTrueOrigin == 3)){
          theData.TrueDecayMuonIndex = P.Index;
          found_decaymuon_as_shower = true;
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && (P.TrackTrueOrigin == 2 || P.TrackTrueOrigin == 3)){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion_as_shower = true;
       }

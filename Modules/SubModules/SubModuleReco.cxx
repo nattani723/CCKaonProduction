@@ -3,7 +3,7 @@
 
 #include "SubModuleReco.h"
 
-using namespace hyperon;
+using namespace cckaon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15,6 +15,7 @@ SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet
 SubModuleReco(e,isdata,
                   pset.get<std::string>("PFParticleModuleLabel"),
                   pset.get<std::string>("TrackModuleLabel"),
+                  pset.get<std::string>("TrackRebuiltModuleLabel"),
                   pset.get<std::string>("ShowerModuleLabel"),
                   pset.get<std::string>("VertexModuleLabel"),
                   pset.get<std::string>("PIDModuleLabel"),
@@ -121,14 +122,14 @@ void SubModuleReco::PrepareInfo(){
          P.Parentage = 1;
          P.InNuSlice = true;         
       }
-      else if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){         
-         P.Parentage = 2; 
+      else if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){ // has daughter track
+         P.Parentage = 3; 
          P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
       }
 
-      if(P.PDG == 13){
+      if(P.PDG == 13){ // primary means nu? This is Pandora PDG code (11 or 13)
          theData.TrackPrimaryDaughters.push_back(P);
-         if(P.InNuSlice) m_PFPID_TrackIndex[pfp->Self()] = P.Index;
+         if(P.InNuSlice) m_PFPID_TrackIndex[pfp->Self()] = P.Index; // CCMuon? track as neutrino daughter
       }
       else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);      
    }
@@ -146,7 +147,7 @@ RecoData SubModuleReco::GetInfo(){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TVector3 SubModuleReco::GetPrimaryVertex(){
+TVector3 SubModuleReco::GetPrimaryVertex(){ //returns neutrino vertex
 
    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
 
@@ -184,7 +185,7 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
    std::vector<art::Ptr<recob::Shower>> pfpShowers = Assoc_PFParticleShower->at(pfp.key());
 
-   if(pfp->PdgCode() == 13 && pfpTracks.size() != 1) P.PDG = 0;
+   if(pfp->PdgCode() == 13 && pfpTracks.size() != 1) P.PDG = 0; // how to handle scattered particles
    if(pfp->PdgCode() == 11 && pfpShowers.size() != 1) P.PDG = 0;
 
    GetPFPMetadata(pfp,P);
@@ -298,6 +299,20 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
       P.TrackTruthPurity = (double)maxhits/hits.size();
    }
    else P.HasTruth = false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleReco::GetCalos(const art::Ptr<recob::Track> &trk,RecoParticle &P){
+
+   std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
+   std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
+   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = caloFromTrack.at(0)->CaloAlgScores();
+
+   CaloStore store = CaloCalc.GetCalos(trk,caloFromTrack,AlgScoresVec);
+   P.Track_LLR_PID = store.LLR;
+
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -420,7 +435,7 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
+void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){ // track vertex
 
    std::vector<art::Ptr<recob::Vertex>> pfpVertex = Assoc_PFParticleVertex->at(pfp.key());
 
@@ -445,9 +460,11 @@ void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero){
       
    bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end() 
-                      || std::find(IsSignalSigmaZero.begin(),IsSignalSigmaZero.end(),true) == IsSignalSigmaZero.end();
+                      || std::find(IsSignal_NuMuP.begin(),IsSignal_NuMuP.end(),true) == IsSignal_NuMuP.end()
+                      || std::find(IsSignal_PiPPi0.begin(),IsSignal_PiPPi0.end(),true) == IsSignal_PiPPi0.end();
 
-   bool found_muon=false,found_decayproton=false,found_decaypion=false;
+   bool found_muon=false, found_kaon=false, found_decaymuon=false, found_decaypion=false;
+   bool found_muon_as_shower=false, found_kaon_as_shower=false, found_decaymuon_as_shower=false, found_decaypion_as_shower=false;
 
    for(size_t i_tr=0;i_tr<theData.TrackPrimaryDaughters.size();i_tr++){
 
@@ -458,12 +475,17 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSi
          found_muon = true; 
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayProtonIndex = P.Index;
-         found_decayproton = true;
+      if(!found_kaon && abs(P.TrackTruePDG) == 321 && P.TrackTrueOrigin == 1){ 
+         theData.TrueKaonIndex = P.Index;
+         found_kaon = true; 
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && P.TrackTrueOrigin == 2){
+         theData.TrueDecayMuonIndex = P.Index;
+         found_decaymuon = true;
+      }
+
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }
@@ -471,26 +493,34 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSi
 
    for(size_t i_sh=0;i_sh<theData.ShowerPrimaryDaughters.size();i_sh++){
 
-      RecoParticle P = theData.ShowerPrimaryDaughters.at(i_sh);
+      RecoParticle P = theData.TrackPrimaryDaughters.at(i_tr);
 
       if(!found_muon && abs(P.TrackTruePDG) == 13 && P.TrackTrueOrigin == 1){ 
          theData.TrueMuonIndex = P.Index;
-         found_muon = true; 
+         found_muon_as_shower = true; 
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayProtonIndex = P.Index;
-         found_decayproton = true;
+      if(!found_kaon && abs(P.TrackTruePDG) == 321 && P.TrackTrueOrigin == 1){ 
+         theData.TrueKaonIndex = P.Index;
+         found_kaon_as_shower = true; 
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaymuon && P.TrackTruePDG == -13 && P.TrackTrueOrigin == 2){
+         theData.TrueDecayMuonIndex = P.Index;
+         found_decaymuon_as_shower = true;
+      }
+
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == 211 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
-         found_decaypion = true;
+         found_decaypion_as_shower = true;
       }
    }
+  
 
-if(ContainsSignal && found_decayproton && found_decaypion) theData.GoodReco = true;
-
+if(ContainsSignal && found_muon && found_kaon && ( found_decaymuon || found_decaypion )) theData.GoodReco = true;
+if(ContainsSignal && found_muon && found_kaon && ( found_decaymuon_as_shower || found_decaypion_as_shower )) theData.GoodPrimaryReco = true;
+if(ContainsSignal && found_muon && found_kaon_as_shower && ( found_decaymuon_as_shower || found_decaypion_as_shower )) theData.GoodRecoAsShower = true;
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

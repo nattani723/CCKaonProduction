@@ -43,6 +43,10 @@ double Track_LLR_PID; // LLR PID
 double Track_LLR_PID_Kaon; // LLR PID with Kaon hypothesis
 double Track_LLR_PID_Kaon_Partial; // LLR PID with Kaon hypothesis using last 5cm of track
 double Track_Bragg_PID_Kaon;
+double Track_Chi2_Kaon_Plane0, Track_Chi2_Kaon_Plane1, Track_Chi2_Kaon_Plane2, Track_Chi2_Kaon_3Plane;
+double Track_Chi2_Proton_Plane0, Track_Chi2_Proton_Plane1, Track_Chi2_Proton_Plane2, Track_Chi2_Proton_3Plane;
+double Track_Chi2_Pion_Plane0, Track_Chi2_Pion_Plane1, Track_Chi2_Pion_Plane2, Track_Chi2_Pion_3Plane;
+double Track_Chi2_Muon_Plane0, Track_Chi2_Muon_Plane1, Track_Chi2_Muon_Plane2, Track_Chi2_Muon_3Plane;
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
 double TrackWiggliness;
 

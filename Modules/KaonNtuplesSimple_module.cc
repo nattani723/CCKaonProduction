@@ -670,7 +670,7 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("DecayVertex_Z",&t_DecayVertex_Z);
 
    OutputTree->Branch("RecoPrimaryVertex","TVector3",&t_RecoPrimaryVertex);
-   OutputTree->Branch("PassNuCCInclusiveFilter",t_PassNuCCInclusiveFilter);
+   OutputTree->Branch("PassNuCCInclusiveFilter",&t_PassNuCCInclusiveFilter);
    OutputTree->Branch("NPrimaryDaughters",&t_NPrimaryDaughters);
    OutputTree->Branch("NPrimaryTrackDaughters",&t_NPrimaryTrackDaughters);
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);

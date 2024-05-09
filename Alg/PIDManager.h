@@ -23,6 +23,7 @@ namespace cckaon {
    const double plane0_wireangle = 30*6.28/360.0;
    const double plane1_wireangle = -30*6.28/360.0;
    const double plane2_wireangle = 90*6.28/360.0;
+   static const int num_plane = 3;
 
    struct PIDStore {
 
@@ -44,10 +45,11 @@ namespace cckaon {
       double Bragg_Kaon_Plane2;    
       double Bragg_Kaon_3Plane;
 
-      std::vector<float> Chi2_Kaon;
-      std::vector<float> Chi2_Proton;
-      std::vector<float> Chi2_Pion;
-      std::vector<float> Chi2_Muon;
+     std::vector<float> Chi2_Kaon;
+     std::vector<float> Chi2_Proton;
+     std::vector<float> Chi2_Pion;
+     std::vector<float> Chi2_Muon;
+
       double Chi2_Kaon_3Plane;
       double Chi2_Proton_3Plane;
       double Chi2_Pion_3Plane;

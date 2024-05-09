@@ -4,6 +4,7 @@ art_make(
 
       LIB_LIBRARIES
       larcorealg_Geometry
+      hep_concurrency
       ubana_ParticleID_Algorithms
       larcore_Geometry_Geometry_service
       larsim_Simulation

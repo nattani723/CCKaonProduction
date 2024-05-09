@@ -144,11 +144,17 @@ G4Truth SubModuleG4Truth::GetG4Info(){
 
    theTruth.InActiveTPC.resize(NMCTruths);
    theTruth.IsHyperon.resize(NMCTruths);
+   theTruth.IsKaon.resize(NMCTruths);
    theTruth.IsKaonP.resize(NMCTruths);
    theTruth.IsKaonP_NuMuP.resize(NMCTruths);
    theTruth.IsKaonP_PiPPi0.resize(NMCTruths);
+   theTruth.IsKaonP_2PiPPiM.resize(NMCTruths);
+   theTruth.IsKaonP_ENuE.resize(NMCTruths);
+   theTruth.IsKaonP_2PiNPiP.resize(NMCTruths);
+   theTruth.IsKaonP_Others.resize(NMCTruths);
    theTruth.IsKaonM.resize(NMCTruths);
    theTruth.IsKaon0.resize(NMCTruths);
+   theTruth.IsAssociatedKaonP.resize(NMCTruths);
 
    theTruth.DecayVertex_X.resize(NMCTruths);
    theTruth.DecayVertex_Y.resize(NMCTruths);
@@ -174,6 +180,8 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    theTruth.KaonPDecay_NuMuP.clear();
    theTruth.KaonPDecay_PiPPi0.clear();
    theTruth.KaonMDecay.clear();
+   theTruth.Kaon0Decay.clear();
+   theTruth.NeutralKaonDecayK0SL.clear();
 
    GetPrimaryParticles();
 
@@ -257,7 +265,6 @@ void SubModuleG4Truth::GetKaonPDecay(){
 	theTruth.KaonPDecay_PiPPi0.push_back(P);
 	P.Origin = 8;
       }
-
    }
 }
 
@@ -534,7 +541,7 @@ void SubModuleG4Truth::SetFlags(){
 
       theTruth.IsHyperon[i_t] = false;
       theTruth.IsKaon[i_t] = false; 
-      theTruth.IsKaonP[i_t] = false; 
+      theTruth.IsKaonP[i_t] = false;
       theTruth.IsKaonP_NuMuP[i_t] = false; 
       theTruth.IsKaonP_PiPPi0[i_t] = false;
       theTruth.IsKaonP_2PiPPiM[i_t] = false;

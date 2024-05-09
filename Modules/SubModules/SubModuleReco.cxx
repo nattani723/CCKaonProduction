@@ -11,7 +11,7 @@ using namespace cckaon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode) :
+SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode, bool withrecoalg) :
 SubModuleReco(e,isdata,
                   pset.get<std::string>("PFParticleModuleLabel"),
                   pset.get<std::string>("TrackModuleLabel"),
@@ -30,9 +30,10 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("G4ModuleLabel"),
                   pset.get<bool>("DoGetPIDs",true),
                   pset.get<bool>("IncludeCosmics",false),
-                  particlegunmode)
+	      particlegunmode,
+	      withrecoalg)
 {
-
+  this->WithRecoAlgorithm = withrecoalg;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@ SubModuleReco(e,isdata,
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel, string trackrebuiltlabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
 			     string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,string showerhitassnlabel,string metadatalabel,string genlabel,
-                                     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode) :
+			     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode, bool withrecoalg) :
 PIDCalc(),
 DoGetPIDs(dogetpids),
 IncludeCosmics(includecosmics),
@@ -55,8 +56,10 @@ ParticleGunMode(particlegunmode)
    if(!e.getByLabel(tracklabel,Handle_Track)) 
       throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
 
-   if(!e.getByLabel(trackrebuiltlabel,Handle_TrackRebuilt)) 
-      throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
+   if(withrecoalg){
+     if(!e.getByLabel(trackrebuiltlabel,Handle_TrackRebuilt)) 
+       throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
+   }
 
    if(!e.getByLabel(showerlabel,Handle_Shower)) 
       throw cet::exception("SubModuleReco") << "No Shower Data Products Found!" << std::endl;
@@ -66,25 +69,25 @@ ParticleGunMode(particlegunmode)
 
    art::fill_ptr_vector(Vect_PFParticle,Handle_PFParticle);
    art::fill_ptr_vector(Vect_Track,Handle_Track);
-   art::fill_ptr_vector(Vect_TrackRebuilt,Handle_TrackRebuilt);
+   if(withrecoalg) art::fill_ptr_vector(Vect_TrackRebuilt,Handle_TrackRebuilt);
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
    Assoc_PFParticleVertex = new art::FindManyP<recob::Vertex>(Vect_PFParticle,e,vertexlabel);    
    Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle,e,tracklabel);
-   Assoc_PFParticleTrackRebuilt = new art::FindManyP<recob::Track>(Vect_PFParticle,e,trackrebuiltlabel); 
+   if(withrecoalg) Assoc_PFParticleTrackRebuilt = new art::FindManyP<recob::Track>(Vect_PFParticle,e,trackrebuiltlabel); 
    Assoc_PFParticleShower = new art::FindManyP<recob::Shower>(Vect_PFParticle,e,showerlabel);    
    Assoc_PFParticleMetadata = new art::FindManyP<larpandoraobj::PFParticleMetadata>(Vect_PFParticle,e,metadatalabel);   
    Assoc_TrackHit = new  art::FindManyP<recob::Hit>(Vect_Track,e,trackhitassnlabel);
-   Assoc_TrackRebuiltHit = new  art::FindManyP<recob::Hit>(Vect_TrackRebuilt,e,trackrebuilthitassnlabel);
+   if(withrecoalg) Assoc_TrackRebuiltHit = new  art::FindManyP<recob::Hit>(Vect_TrackRebuilt,e,trackrebuilthitassnlabel);
    Assoc_ShowerHit = new  art::FindManyP<recob::Hit>(Vect_Shower,e,showerhitassnlabel);
    ParticlesPerHit = new art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>(Handle_Hit,e,hittruthassnlabel);
 
    if(DoGetPIDs){
       Assoc_TrackCalo = new art::FindManyP<anab::Calorimetry>(Vect_Track,e,calolabel);
-      Assoc_TrackRebuiltCalo = new art::FindManyP<anab::Calorimetry>(Vect_TrackRebuilt,e,calolabel);
+      if(withrecoalg) Assoc_TrackRebuiltCalo = new art::FindManyP<anab::Calorimetry>(Vect_TrackRebuilt,e,calolabel);
       Assoc_TrackPID = new art::FindManyP<anab::ParticleID>(Vect_Track,e,pidlabel);
-      Assoc_TrackRebuiltPID = new art::FindManyP<anab::ParticleID>(Vect_TrackRebuilt,e,pidlabel);
+      if(withrecoalg) Assoc_TrackRebuiltPID = new art::FindManyP<anab::ParticleID>(Vect_TrackRebuilt,e,pidlabel);
    }
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
@@ -126,7 +129,9 @@ void SubModuleReco::PrepareInfo(){
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
+
       if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
+
       RecoParticle P = MakeRecoParticle(pfp);
       
       if(pfp->Parent() == neutrinoID){
@@ -165,6 +170,7 @@ void SubModuleReco::PrepareInfo(){
    theData.NOtherTracks = theData.TrackOthers.size();
    theData.NOtherRebuiltTracks = theData.TrackRebuiltOthers.size();
    theData.NOtherShowers = theData.ShowerOthers.size();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,12 +217,21 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
    P.PDG = pfp->PdgCode();
 
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
-   std::vector<art::Ptr<recob::Track>> pfpTrackRebuilts = Assoc_PFParticleTrackRebuilt->at(pfp.key());
    std::vector<art::Ptr<recob::Shower>> pfpShowers = Assoc_PFParticleShower->at(pfp.key());
 
    if(pfp->PdgCode() == 13 && pfpTracks.size() != 1) P.PDG = 0; // how to handle scattered particles
-   if(pfp->PdgCode() == 13 && pfpTrackRebuilts.size() != 1) P.PDG = 0;
    if(pfp->PdgCode() == 11 && pfpShowers.size() != 1) P.PDG = 0;
+
+   if(WithRecoAlgorithm){
+     std::vector<art::Ptr<recob::Track>> pfpTrackRebuilts = Assoc_PFParticleTrackRebuilt->at(pfp.key());
+     if(pfp->PdgCode() == 13 && pfpTrackRebuilts.size() != 1) P.PDG = 0;
+
+     if(pfpTrackRebuilts.size() == 1){
+       P.IsRebuilt = true;
+       GetTrackData(pfp,P);
+       GetVertexData(pfp,P);
+     }
+   }
 
    GetPFPMetadata(pfp,P);
 
@@ -224,14 +239,10 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
       GetTrackData(pfp,P);
       GetVertexData(pfp,P);
    }
-   if(pfpTrackRebuilts.size() == 1){
-      P.IsRebuilt = true;
-      GetTrackData(pfp,P);
-      GetVertexData(pfp,P);
-   }
+
    if(pfpShowers.size() == 1){
-      GetShowerData(pfp,P);
-      GetVertexData(pfp,P);
+     GetShowerData(pfp,P);
+     GetVertexData(pfp,P);
    }
 
    return P;
@@ -284,7 +295,7 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
 
    if(!IsData) TruthMatch(trk,P);
 
-   if(!IsData) MergeCheck(hits,P);
+   if(!IsData && WithRecoAlgorithm) MergeCheck(hits,P);
 
    if(DoGetPIDs) GetPIDs(trk,P);
    
@@ -308,7 +319,7 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
    //if(!IsData) TruthMatch(trk,P);
 
    std::vector<art::Ptr<recob::Hit>> hits = Assoc_ShowerHit->at(shw.key());
-   if(!IsData) MergeCheck(hits,P);
+   if(!IsData && WithRecoAlgorithm) MergeCheck(hits,P);
 
    //if(DoGetPIDs) GetPIDs(trk,P);
    
@@ -499,6 +510,7 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
    std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
 
    PIDStore store = PIDCalc.GetPIDs(trk,caloFromTrack,AlgScoresVec);
+
    P.Track_LLR_PID = store.LLR;
    P.Track_LLR_PID_Kaon = store.LLR_Kaon;
    P.Track_LLR_PID_Kaon_Partial = store.LLR_Kaon_Partial;
@@ -657,7 +669,7 @@ bool SubModuleReco::ApplyNuCCInclusiveFilter(art::Event const& e){
   art::ValidHandle<art::TriggerResults> trigRes = e.getValidHandle<art::TriggerResults>(trigResInputTag);
 	
   fhicl::ParameterSet pset;
-  //if (!fhicl::ParameterSetRegistry::get(trigRes->parameterSetID(), pset)) { throw cet::exception("PSet Not Found???"); }
+  if (!fhicl::ParameterSetRegistry::get(trigRes->parameterSetID(), pset)) { throw cet::exception("PSet Not Found???"); }
   std::vector<std::string> trigger_path_names = pset.get<std::vector<std::string> >("trigger_paths", {});
   if (trigger_path_names.size()!=trigRes->size()) { throw cet::exception("Size mismatch???"); }
   for (size_t itp=0;itp<trigRes->size();itp++) {
@@ -709,7 +721,7 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
 
    for(size_t i_sh=0;i_sh<theData.ShowerPrimaryDaughters.size();i_sh++){
 
-      RecoParticle P = theData.TrackPrimaryDaughters.at(i_sh);
+      RecoParticle P = theData.ShowerPrimaryDaughters.at(i_sh);
 
       /*
       if(!found_muon && abs(P.TrackTruePDG) == 13 && P.TrackTrueOrigin == 1){ 
@@ -717,7 +729,6 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
          found_muon_as_shower = true; 
       }
       */
-
       if(!found_kaon && abs(P.TrackTruePDG) == 321 && P.TrackTrueOrigin == 1){ 
          theData.TrueKaonIndex = P.Index;
          found_kaon_as_shower = true; 

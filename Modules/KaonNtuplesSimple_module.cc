@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
-// Class:       KaonNtuples
+// Class:       KaonNtuplesSimple
 // Plugin Type: analyzer (art v3_03_01)
-// File:        KaonNtuples_module.cc
+// File:        KaonNtuplesSimple_module.cc
 //
 // Generated at Mon Jan 20 06:07:14 2020 by Christopher Thorpe using cetskelgen
 // from cetlib version v3_08_00.
@@ -18,6 +18,7 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/ParameterSetRegistry.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
@@ -46,21 +47,21 @@
 #include "ubana/CCKaonProduction/Modules/SubModules/SubModuleReco.h"
 
 namespace cckaon {
-   class KaonNtuples;
+   class KaonNtuplesSimple;
 }
 
 
-class cckaon::KaonNtuples : public art::EDAnalyzer {
+class cckaon::KaonNtuplesSimple : public art::EDAnalyzer {
 public:
-  explicit KaonNtuples(fhicl::ParameterSet const& p);
+  explicit KaonNtuplesSimple(fhicl::ParameterSet const& p);
   // The compiler-generated destructor is fine for non-base
   // classes without bare pointers or other resource use.
   
   // Plugins should not be copied or assigned.
-  KaonNtuples(KaonNtuples const&) = delete;
-  KaonNtuples(KaonNtuples&&) = delete;
-  KaonNtuples& operator=(KaonNtuples const&) = delete;
-  KaonNtuples& operator=(KaonNtuples&&) = delete;
+  KaonNtuplesSimple(KaonNtuplesSimple const&) = delete;
+  KaonNtuplesSimple(KaonNtuplesSimple&&) = delete;
+  KaonNtuplesSimple& operator=(KaonNtuplesSimple const&) = delete;
+  KaonNtuplesSimple& operator=(KaonNtuplesSimple&&) = delete;
   
   // Required functions.
   void analyze(art::Event const& e) override;
@@ -221,6 +222,7 @@ private:
   bool f_ParticleGun = false;
   bool f_IsData;
   bool f_Debug = false;
+  bool f_WithRecoAlg = false;
   
 };
 
@@ -228,7 +230,7 @@ private:
 // Setup module labels/read in fhicl settings     //
 ////////////////////////////////////////////////////
 
-cckaon::KaonNtuples::KaonNtuples(fhicl::ParameterSet const& p)
+cckaon::KaonNtuplesSimple::KaonNtuplesSimple(fhicl::ParameterSet const& p)
    : EDAnalyzer{p},
    f_GetGeneratorInfo(p.get<bool>("GetGeneratorInfo",true)),   
    f_GetG4Info(p.get<bool>("GetG4Info",true)),   
@@ -241,7 +243,7 @@ cckaon::KaonNtuples::KaonNtuples(fhicl::ParameterSet const& p)
    f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
    f_ParticleGun(p.get<bool>("ParticleGun",false)),
    f_IsData(p.get<bool>("IsData")),
-   f_Debug(p.get<bool>("Debug",false))
+  f_Debug(p.get<bool>("Debug",true))
 {
   std::cout << "constructor called" << std::endl;
    if(f_WeightLabels.size()){
@@ -251,8 +253,9 @@ cckaon::KaonNtuples::KaonNtuples(fhicl::ParameterSet const& p)
       
 }
 
-void cckaon::KaonNtuples::analyze(art::Event const& e)
+void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
 {
+
    if(f_Debug) std::cout << "New Event" << std::endl;
 
    //begin by resetting everything
@@ -446,9 +449,12 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
 
       if(f_Debug) std::cout << "Getting Reconstructed Info" << std::endl;
 
-      SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco,f_ParticleGun);
+      SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco,f_ParticleGun, f_WithRecoAlg);
+
       Reco_SM->PrepareInfo();
+
       Reco_SM->SetIndices(t_IsSignal,t_IsSignal_NuMuP,t_IsSignal_PiPPi0);
+
       RecoData RecoD =  Reco_SM->GetInfo();   
 
       t_PassNuCCInclusiveFilter = Reco_SM->ApplyNuCCInclusiveFilter(e);
@@ -471,7 +477,7 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
 
       // If configured to get repass of reconstruction
       if(f_RecoRepass.size()){
-        std::cout << "Getting repassed information" << std::endl;
+        if(f_Debug) std::cout << "Getting repassed information" << std::endl;
          for(size_t i_r=0;i_r<f_RecoRepass.size();i_r++){
             SubModuleReco* Reco_SM_Repass = new SubModuleReco(e,f_IsData,f_RecoRepass.at(i_r));
             Reco_SM_Repass->PrepareInfo();
@@ -485,139 +491,6 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
    }
 
 
-   // Systematics weights if requested
-/*
-   if(!f_IsData){
-
-      t_SysWeights.resize(t_NMCTruths);
-
-      for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
-
-         std::cout << "Getting new weight products with label " << f_WeightLabels.at(i_w) << std::endl;
-
-         // Try to get some systematics info
-         art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
-         std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
-
-         if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
-            throw cet::exception("KaonNtuples") << "No EventWeight Found!" << std::endl;
-
-         art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
-
-         if(!Vect_EventWeight.size())
-            throw cet::exception("KaonNtuples") << "Weight vector empty!" << std::endl;
-
-         if(Vect_EventWeight.size() != (size_t)t_NMCTruths)
-            throw cet::exception("KaonNtuples") << "Weight vector size != NMCTruths" << std::endl;
-
-         for(size_t i_tr=0;i_tr<Vect_EventWeight.size();i_tr++){       
-
-            std::cout << "Getting weights for truth " << i_tr << std::endl;
-
-            std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(i_tr)->fWeight;
-            std::map<std::string,std::vector<double>>::iterator it;
-
-            for(it = theWeights.begin(); it != theWeights.end();it++){
-
-               if(it->first ==  "empty") continue;
-
-               bool dial_found=false;
-
-               // Search the dial vector for this dial         
-               for(size_t i_d=0;i_d<t_SysDials.size();i_d++){
-                  if(it->first == t_SysDials.at(i_d)){
-                     t_SysWeights.at(i_tr).at(i_d).insert(t_SysWeights.at(i_tr).at(i_d).end(),it->second.begin(),it->second.end());
-                     dial_found=true;
-                  }
-               }  
-
-               if(!dial_found){
-                  if(i_tr != 0)
-                     throw cet::exception("KaonNtuples") << "Malformed systematics weight vectors" << std::endl;
-                  t_SysDials.push_back(it->first);
-                  t_SysWeights.at(0).push_back(it->second);
-                  for(size_t i_tr2=0;i_tr2<t_SysWeights.size();i_tr2++)
-                     t_SysWeights.at(i_tr2).resize(t_SysWeights.at(0).size());
-               } // if new dial
-
-            } // iterate over weight products       
-         } // i_tr
-
-      } // i_w
-   } // if not data
-*/
-
-   if(!f_IsData){
-
-      std::vector<std::map<std::string,std::vector<double>>> theweightmap(t_NMCTruths); 
-
-      for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
-
-         std::cout << "Getting new weight products with label " << f_WeightLabels.at(i_w) << std::endl;
-
-         art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
-         std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
-
-         if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
-            throw cet::exception("KaonNtuples") << "No EventWeight Found!" << std::endl;
-
-         art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
-
-         if(!Vect_EventWeight.size())
-            throw cet::exception("KaonNtuples") << "Weight vector empty!" << std::endl;
-
-         if(Vect_EventWeight.size() != (size_t)t_NMCTruths)
-            throw cet::exception("KaonNtuples") << "Weight vector size != NMCTruths" << std::endl;
-
-         for(size_t i_tr=0;i_tr<Vect_EventWeight.size();i_tr++){       
-
-            std::cout << "Getting weights for truth " << i_tr << std::endl;
-
-            std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(i_tr)->fWeight;
-            std::map<std::string,std::vector<double>>::iterator it;
-
-            for(it = theWeights.begin();it != theWeights.end();it++){
-
-               if(it->first ==  "empty") continue;
-
-               bool dial_found=false;
-
-               std::map<std::string,std::vector<double>>::iterator it2;
-               for(it2 = theweightmap.at(i_tr).begin();it2 != theweightmap.at(i_tr).end();it2++){
-                  if(it->first == it2->first){
-                     dial_found = true;
-                     theweightmap.at(i_tr)[it->first].insert(theweightmap.at(i_tr)[it->first].end(),it->second.begin(),it->second.end());
-                  }
-               }
-
-               if(!dial_found)
-                  theweightmap.at(i_tr)[it->first] = it->second;
-
-            }
-         } // i_tr
-      }
-
-      // Organise the weights
-      if(theweightmap.size()){
-         std::map<std::string,std::vector<double>>::iterator it;
-         for(it = theweightmap.at(0).begin();it != theweightmap.at(0).end();it++){
-            std::cout << "Organising weights for dial " << it->first << std::endl;
-
-            t_SysDials.push_back(it->first);
-            t_SysWeights.push_back(it->second);
-
-            for(size_t i_tr=1;i_tr<theweightmap.size();i_tr++){
-               if(theweightmap.at(i_tr).find(it->first) == theweightmap.at(i_tr).end()) 
-                  throw cet::exception("KaonNtuples") << "Dial " << it->first << " not found in weights for MC truth " << i_tr << std::endl;
-               if(theweightmap.at(i_tr)[it->first].size() != t_SysWeights.back().size())
-                  throw cet::exception("KaonNtuples") << "Dial " << it->first << " weight vector mismatch" << std::endl;                        
-               for(size_t i_w=0;i_w<t_SysWeights.back().size();i_w++)
-                  t_SysWeights.back().at(i_w) *= theweightmap.at(i_tr)[it->first].at(i_w);
-            }                  
-         }
-      }
-   }// if(!f_IsData)
-
    FinishEvent();
 }
 
@@ -625,7 +498,7 @@ void cckaon::KaonNtuples::analyze(art::Event const& e)
 // Finished processing event - update Metadata and fill tree //
 ///////////////////////////////////////////////////////////////
 
-void cckaon::KaonNtuples::FinishEvent(){
+void cckaon::KaonNtuplesSimple::FinishEvent(){
 
    if(f_Debug) std::cout << "Finishing Event" << std::endl;
 
@@ -649,9 +522,9 @@ void cckaon::KaonNtuples::FinishEvent(){
 
 ///////////////////////////////////////////////////////////////	
 
-void cckaon::KaonNtuples::beginJob(){
+void cckaon::KaonNtuplesSimple::beginJob(){
 
-   if(f_Debug) std::cout << "Begin job" << std::endl;
+  if(f_Debug) std::cout << "Begin job" << std::endl;
 
    art::ServiceHandle<art::TFileService> tfs;
 
@@ -781,12 +654,12 @@ void cckaon::KaonNtuples::beginJob(){
 
 }
 
-void cckaon::KaonNtuples::endJob()
+void cckaon::KaonNtuplesSimple::endJob()
 {
    MetaTree->Fill();
 }
 
-void cckaon::KaonNtuples::beginSubRun(const art::SubRun& sr)
+void cckaon::KaonNtuplesSimple::beginSubRun(const art::SubRun& sr)
 {
    if(f_Debug) std::cout << "Getting Subrun POT Info" << std::endl;
 
@@ -794,6 +667,6 @@ void cckaon::KaonNtuples::beginSubRun(const art::SubRun& sr)
    if(sr.getByLabel(f_POTSummaryLabel,POTHandle)) m_POT += POTHandle->totpot;	
 }
 
-void cckaon::KaonNtuples::endSubRun(const art::SubRun& sr){}
+void cckaon::KaonNtuplesSimple::endSubRun(const art::SubRun& sr){}
 
-DEFINE_ART_MODULE(cckaon::KaonNtuples)
+DEFINE_ART_MODULE(cckaon::KaonNtuplesSimple)

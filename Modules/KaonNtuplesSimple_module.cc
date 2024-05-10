@@ -3,7 +3,8 @@
 // Plugin Type: analyzer (art v3_03_01)
 // File:        KaonNtuplesSimple_module.cc
 //
-// Generated at Mon Jan 20 06:07:14 2020 by Christopher Thorpe using cetskelgen
+// Generated at Mon Jan 20 06:07:14 2020 by Christopher Thorpe using cetskelgen for HyperonNtuple
+// Modified to CCKaon Analysis by Natsumi Taniuchi at 10 May 2024
 // from cetlib version v3_08_00.
 ////////////////////////////////////////////////////////////////////////
 

@@ -153,7 +153,7 @@ void SubModuleReco::PrepareInfo(){
             m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
 	 }
 	 else{
-	    if(P.IsRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
+	    if(P.UseRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
 	    else theData.TrackOthers.push_back(P);
 	 }
       }
@@ -278,15 +278,32 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
   art::Ptr<recob::Track> trk;
 
    if(P.IsRebuilt==true){
-     pfpTracks = Assoc_PFParticleTrackRebuilt->at(pfp.key());
-     trk = pfpTracks.at(0);
-     hits = Assoc_TrackRebuiltHit->at(trk.key());
+
+     std::vector<art::Ptr<recob::Track>> pfpTracks_rebuilt = Assoc_PFParticleTrackRebuilt->at(pfp.key());
+     art::Ptr<recob::Track> trk_rebuilt = pfpTracks_rebuilt.at(0);
+
+     std::vector<art::Ptr<recob::Track>> pfpTracks_usual = Assoc_PFParticleTrack->at(pfp.key());
+     art::Ptr<recob::Track> trk_usual = pfpTracks_usual.at(0); 
+
+     if( trk_rebuilt->Length()>0. && ( trk_usual->Length()<40. ||  trk_usual->Length()>65.) ){
+       pfpTracks = pfpTracks_rebuilt;
+       trk = trk_rebuilt;
+       hits = Assoc_TrackRebuiltHit->at(trk.key());
+       P.UseRebuilt = true;
+     }
+     else{
+       pfpTracks = pfpTracks_usual;
+       trk = trk_usual;
+       hits = Assoc_TrackHit->at(trk.key());
+     }
+
    }
    else{
      pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
      trk = pfpTracks.at(0); 
      hits = Assoc_TrackHit->at(trk.key());
    }
+
 
    if(pfpTracks.size() != 1) return;
 
@@ -332,7 +349,7 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
 void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
   std::vector<art::Ptr<recob::Hit>> hits;
-  if(P.IsRebuilt==true) hits = Assoc_TrackRebuiltHit->at(trk.key());
+  if(P.UseRebuilt==true) hits = Assoc_TrackRebuiltHit->at(trk.key());
   else hits = Assoc_TrackHit->at(trk.key());
 
    std::unordered_map<int,double>  trkide;
@@ -498,7 +515,7 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
   std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack;
   std::vector<art::Ptr<anab::ParticleID>> trackPID;
 
-   if(P.IsRebuilt==true){
+   if(P.UseRebuilt==true){
 	caloFromTrack = Assoc_TrackRebuiltCalo->at(trk.key());
    	trackPID = Assoc_TrackRebuiltPID->at(trk.key());
    }

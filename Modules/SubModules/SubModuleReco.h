@@ -67,6 +67,8 @@ struct RecoData {
    size_t TrueDecayPionIndex = -1;
 
    bool GoodReco = false;
+   bool GoodReco_NuMuP = false;
+   bool GoodReco_PiPPi0 = false;
    bool GoodPrimaryReco = false;
    bool GoodRecoAsShower = false;
 

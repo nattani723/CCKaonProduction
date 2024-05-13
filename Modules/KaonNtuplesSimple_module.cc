@@ -111,6 +111,8 @@ private:
   bool t_EventHasKaon0;
   // bool t_EventHasK0S;
   bool t_GoodReco;
+  bool t_GoodReco_NuMuP;
+  bool t_GoodReco_PiPPi0;
   bool t_GoodPrimaryReco;
   bool t_GoodRecoAsShower;
   
@@ -200,6 +202,8 @@ private:
   int m_NSignal_NuMuP;  
   int m_NSignal_PiPPi0;  
   int m_NGoodReco;
+  int m_NGoodReco_NuMuP;
+  int m_NGoodReco_PiPPi0;
 
   double m_POT = 0; //total POT of the sample
 
@@ -294,6 +298,8 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
    t_EventHasKaonM = false;
    t_EventHasKaon0 = false;
    t_GoodReco = false;
+   t_GoodReco_NuMuP = false;
+   t_GoodReco_PiPPi0 = false;
 
    t_Neutrino.clear();
    t_Lepton.clear();
@@ -473,6 +479,8 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_ShowerOthers = RecoD.ShowerOthers;
       t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
       t_GoodReco = RecoD.GoodReco;
+      t_GoodReco_NuMuP = RecoD.GoodReco_NuMuP;
+      t_GoodReco_PiPPi0 = RecoD.GoodReco_PiPPi0;
 
       delete Reco_SM;
 
@@ -587,6 +595,8 @@ void cckaon::KaonNtuplesSimple::FinishEvent(){
    if(std::find(t_IsSignal_NuMuP.begin(), t_IsSignal_NuMuP.end(), true) != t_IsSignal_NuMuP.end()) m_NSignal_NuMuP++;
    if(std::find(t_IsSignal_PiPPi0.begin(), t_IsSignal_PiPPi0.end(), true) != t_IsSignal_PiPPi0.end()) m_NSignal_PiPPi0++;
    if(t_GoodReco) m_NGoodReco++;
+   if(t_GoodReco_NuMuP) m_NGoodReco_NuMuP++;
+   if(t_GoodReco_PiPPi0) m_NGoodReco_PiPPi0++;
 
    if(f_Debug) std::cout << "Finished event" << std::endl;
 
@@ -634,6 +644,8 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("IsSignal_NuMuP","vector<bool>",&t_IsSignal_NuMuP); 
    OutputTree->Branch("IsSignal_PiPPi0","vector<bool>",&t_IsSignal_PiPPi0); 
    OutputTree->Branch("GoodReco",&t_GoodReco);
+   OutputTree->Branch("GoodReco_NuMuP",&t_GoodReco_NuMuP);
+   OutputTree->Branch("GoodReco_PiPPi0",&t_GoodReco_PiPPi0);
    OutputTree->Branch("GoodPrimaryReco",&t_GoodPrimaryReco);
    OutputTree->Branch("GoodRecoAsShower",&t_GoodRecoAsShower);
 
@@ -705,6 +717,8 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    m_NSignal_NuMuP=0;
    m_NSignal_PiPPi0=0;
    m_NGoodReco=0;
+   m_NGoodReco_NuMuP=0;
+   m_NGoodReco_PiPPi0=0;
    m_POT=0;
 
    MetaTree=tfs->make<TTree>("MetaTree","Metadata Info Tree");
@@ -719,6 +733,8 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    MetaTree->Branch("NSignal_NuMuP",&m_NSignal_NuMuP);
    MetaTree->Branch("NSignal_PiPPi0",&m_NSignal_PiPPi0);
    MetaTree->Branch("NGoodReco",&m_NGoodReco);
+   MetaTree->Branch("NGoodReco_NuMuP",&m_NGoodReco_NuMuP);
+   MetaTree->Branch("NGoodReco_PiPPi0",&m_NGoodReco_PiPPi0);
 
    MetaTree->Branch("POT",&m_POT);
 

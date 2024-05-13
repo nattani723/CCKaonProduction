@@ -764,6 +764,8 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal, std::vector<bool> IsS
   
 
 if(ContainsSignal && found_muon && found_kaon && ( found_decaymuon || found_decaypion )) theData.GoodReco = true;
+if(ContainsSignal && found_muon && found_kaon && found_decaymuon) theData.GoodReco_NuMuP = true;
+if(ContainsSignal && found_muon && found_kaon && found_decaypion) theData.GoodReco_PiPPi0 = true;
 if(ContainsSignal && found_muon && found_kaon && ( found_decaymuon_as_shower || found_decaypion_as_shower )) theData.GoodPrimaryReco = true;
 if(ContainsSignal && found_muon && found_kaon_as_shower && ( found_decaymuon_as_shower || found_decaypion_as_shower )) theData.GoodRecoAsShower = true;
   

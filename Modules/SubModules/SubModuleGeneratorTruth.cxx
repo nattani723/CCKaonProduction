@@ -69,7 +69,7 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
 
          // If there is a kaon in the final state in a RES/DIS event, change mode to KAON
          if(isKaon(Part.PdgCode()) && Part.StatusCode() == 1 && ( mode == 1 || mode == 2) ) theTruth.Mode.back() = "KAON";
-         if(isKaonP(Part.PdgCode()) && Part.StatusCode() == 1 && ( mode == 1 || mode == 2) ) theTruth.Mode.back() = "KAONP";
+         //if(isKaonP(Part.PdgCode()) && Part.StatusCode() == 1 && ( mode == 1 || mode == 2) ) theTruth.Mode.back() = "KAONP";
 
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
          if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){

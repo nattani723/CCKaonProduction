@@ -418,7 +418,7 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_PrimaryPion = G4T.PrimaryPion;
       t_PrimaryKaon = G4T.PrimaryKaon;
       t_PrimaryKaonP = G4T.PrimaryKaonP;
-      t_PrimaryKaonP = G4T.PrimaryKaonM;
+      t_PrimaryKaonM = G4T.PrimaryKaonM;
       t_PrimaryNucleus = G4T.PrimaryNucleus;
       t_HyperonDecay = G4T.HyperonDecay;
       t_KaonPDecay = G4T.KaonPDecay;
@@ -665,6 +665,7 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("PrimaryPion","vector<SimParticle>",&t_PrimaryPion);
    OutputTree->Branch("PrimaryKaon","vector<SimParticle>",&t_PrimaryKaon);
    OutputTree->Branch("PrimaryKaonP","vector<SimParticle>",&t_PrimaryKaonP);
+   OutputTree->Branch("PrimaryKaonM","vector<SimParticle>",&t_PrimaryKaonM);
    OutputTree->Branch("PrimaryNucleus","vector<SimParticle>",&t_PrimaryNucleus);
    OutputTree->Branch("HyperonDecay","vector<SimParticle>",&t_HyperonDecay);
    OutputTree->Branch("KaonPDecay","vector<SimParticle>",&t_KaonPDecay);
@@ -691,8 +692,8 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("NOtherRebuiltTracks",&t_NOtherRebuiltTracks);
    OutputTree->Branch("NOtherShowers",&t_NOtherShowers);
    
-   OutputTree->Branch("TracklikePrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);
-   OutputTree->Branch("ShowerlikePrimaryDaughters","vector<RecoParticle>",&t_ShowerPrimaryDaughters);
+   OutputTree->Branch("TrackPrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);
+   OutputTree->Branch("ShowerPrimaryDaughters","vector<RecoParticle>",&t_ShowerPrimaryDaughters);
    OutputTree->Branch("TrackOthers","vector<RecoParticle>",&t_TrackOthers);
    OutputTree->Branch("TrackRebuiltOthers","vector<RecoParticle>",&t_TrackRebuiltOthers);
    OutputTree->Branch("ShowerOthers","vector<RecoParticle>",&t_ShowerOthers);

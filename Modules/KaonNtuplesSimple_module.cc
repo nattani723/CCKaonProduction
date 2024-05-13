@@ -436,9 +436,9 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
 
 
       for(int i_t=0;i_t<t_NMCTruths;i_t++){
-         t_IsSignal[i_t] = t_Mode.at(i_t) == "KAONP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP.at(i_t);
-         t_IsSignal_NuMuP[i_t] = t_Mode.at(i_t) == "KAONP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP_NuMuP.at(i_t);
-         t_IsSignal_PiPPi0[i_t] = t_Mode.at(i_t) == "KAONP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP_PiPPi0.at(i_t);
+         t_IsSignal[i_t] = t_Mode.at(i_t) == "KAON" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP.at(i_t);
+         t_IsSignal_NuMuP[i_t] = t_Mode.at(i_t) == "KAON" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP_NuMuP.at(i_t);
+         t_IsSignal_PiPPi0[i_t] = t_Mode.at(i_t) == "KAON" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == 14 && t_IsKaonP_PiPPi0.at(i_t);
       }
 
       delete G4_SM;

@@ -68,11 +68,13 @@ void SubModuleG4Truth::GetParticleLists(){
       }		
 
       if(isKaon(g4p->PdgCode())){
-        if(g4p->PdgCode() == 321 && g4p->EndProcess() == "Decay")
+
+	//if(g4p->PdgCode() == 321) std::cout << "g4p->EndProcess(): " << g4p->EndProcess() << std::endl;
+        if(g4p->PdgCode() == 321 && (g4p->EndProcess() == "Decay" || g4p->EndProcess() == "FastScintillation") )
 	  KaonP_Daughter_IDs.insert(KaonP_Daughter_IDs.begin(),IDs.begin(),IDs.end());
 
-        //if(g4p->PdgCode() == 321 && g4p->EndProcess() == "kaon+Inelastic")
-	//KaonP_Inelastic_Daughter_IDs.insert(KaonP_Inelastic_Daughter_IDs.begin(),IDs.begin(),IDs.end());
+        if(g4p->PdgCode() == 321 && g4p->EndProcess() == "kaon+Inelastic")
+	  KaonP_Inelastic_Daughter_IDs.insert(KaonP_Inelastic_Daughter_IDs.begin(),IDs.begin(),IDs.end());
 
         if(g4p->PdgCode() == -321 && g4p->EndProcess() == "Decay")
 	  KaonM_Daughter_IDs.insert(KaonM_Daughter_IDs.begin(),IDs.begin(),IDs.end());
@@ -401,7 +403,7 @@ std::vector<int> SubModuleG4Truth::GetChildIDs(const art::Ptr<simb::MCParticle> 
 
    std::vector<int> DecayProduct_IDs;
 
-   if(g4p->EndProcess() != "Decay" && !IsNeutron && !isKaon(g4p->PdgCode())) return DecayProduct_IDs;
+   //if( (g4p->EndProcess() != "Decay" || g4p->EndProcess() != "FastScintillation") && !IsNeutron && !isKaon(g4p->PdgCode())) return DecayProduct_IDs;
 
    for(int i_d=0;i_d<g4p->NumberDaughters();i_d++){
 

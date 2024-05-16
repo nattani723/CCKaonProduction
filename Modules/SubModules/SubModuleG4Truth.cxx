@@ -475,8 +475,47 @@ bool SubModuleG4Truth::FindKaonPScatter(){
          //double P = sqrt(part2->Px()*part2->Px() + part2->Py()*part2->Py() + part2->Pz()*part2->Pz());
          if(part2->PdgCode() == 321) nKaonPs++; 
       }
-       
+
       if(nKaonPs >= 1) return true;
+   }
+
+   return false;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool SubModuleG4Truth::FindProtonScatter(){
+
+   std::vector<int> Proton_IDs;
+
+   for(size_t i=0;i<Primary_IDs.size();i++){
+
+      if(partByID.find(Primary_IDs[i]) == partByID.end()) continue;
+
+      art::Ptr<simb::MCParticle> part = partByID[Primary_IDs[i]];
+
+      if(part->PdgCode() != 2212) continue;
+
+      if(part->EndProcess() == "protonInelastic") Proton_IDs.push_back(part->TrackId()); 
+
+   }
+
+   for(size_t i=0;i<Proton_IDs.size();i++){
+      art::Ptr<simb::MCParticle> part = partByID[Proton_IDs[i]];
+      std::vector<int> Proton_Inelastic_Daughter_IDs = GetChildIDs(part,true);      
+
+      int nProtons = 0;
+
+      for(size_t i_d=0;i_d<Proton_Inelastic_Daughter_IDs.size();i_d++){
+
+         // Look for protons
+         art::Ptr<simb::MCParticle> part2 = partByID[Proton_Inelastic_Daughter_IDs[i_d]];
+         //double P = sqrt(part2->Px()*part2->Px() + part2->Py()*part2->Py() + part2->Pz()*part2->Pz());
+         if(part2->PdgCode() == 2212) nProtons++; 
+      }
+
+      if(nProtons >= 1) return true;
    }
 
    return false;
@@ -631,6 +670,7 @@ void SubModuleG4Truth::SetFlags(){
    }
 
    theTruth.EventHasKaonPScatter = FindKaonPScatter();   
+   theTruth.EventHasProtonScatter = FindProtonScatter();   
    theTruth.EventHasHyperon = std::find(theTruth.IsHyperon.begin(), theTruth.IsHyperon.end(), true) != theTruth.IsHyperon.end();
    theTruth.EventHasKaon = std::find(theTruth.IsKaon.begin(), theTruth.IsKaon.end(), true) != theTruth.IsKaon.end();
    theTruth.EventHasKaonP = std::find(theTruth.IsKaonP.begin(), theTruth.IsKaonP.end(), true) != theTruth.IsKaonP.end();

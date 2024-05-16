@@ -102,6 +102,7 @@ private:
   
   // Flags applying to the entire event
   bool t_EventHasKaonPScatter;
+  bool t_EventHasProtonScatter;
   bool t_EventHasHyperon;
   bool t_EventHasKaon;
   bool t_EventHasKaonP;
@@ -290,6 +291,7 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
    t_IsSignal_NuMuP.clear();
    t_IsSignal_PiPPi0.clear();
    t_EventHasKaonPScatter = false;
+   t_EventHasProtonScatter = false;
    t_EventHasHyperon = false;
    t_EventHasKaon = false;
    t_EventHasKaonP = false;
@@ -402,6 +404,7 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_IsKaon0 = G4T.IsKaon0;
 
       t_EventHasKaonPScatter = G4T.EventHasKaonPScatter;
+      t_EventHasProtonScatter = G4T.EventHasProtonScatter;
       t_EventHasHyperon = G4T.EventHasHyperon;
       t_EventHasKaon = G4T.EventHasKaon;
       t_EventHasKaonP = G4T.EventHasKaonP;
@@ -650,6 +653,7 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("GoodRecoAsShower",&t_GoodRecoAsShower);
 
    OutputTree->Branch("EventHasKaonPScatter",&t_EventHasKaonPScatter);
+   OutputTree->Branch("EventHasProtonScatter",&t_EventHasProtonScatter);
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
    OutputTree->Branch("EventHasKaon",&t_EventHasKaon);
    OutputTree->Branch("EventHasKaonP",&t_EventHasKaonP);

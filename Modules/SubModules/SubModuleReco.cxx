@@ -128,9 +128,10 @@ void SubModuleReco::PrepareInfo(){
 
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
+   std::cout << "Vect_PFParticle.size(): " << Vect_PFParticle.size() << std::endl;
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
 
-      if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
+     if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
 
       RecoParticle P = MakeRecoParticle(pfp);
       
@@ -147,17 +148,19 @@ void SubModuleReco::PrepareInfo(){
       }
 
       if(P.PDG == 13){ // This is Pandora PDG code (11 or 13)
+      //if( Assoc_PFParticleTrack->at(pfp.key()).size()==1 ){
          //theData.TrackPrimaryDaughters.push_back(P);
 	 if(P.InNuSlice){
 	    theData.TrackPrimaryDaughters.push_back(P);
             m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
 	 }
 	 else{
-	    if(P.UseRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
-	    else theData.TrackOthers.push_back(P);
+	   if(P.UseRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
+	   else theData.TrackOthers.push_back(P);
 	 }
-      }
+	}
       else if(P.PDG == 11){
+      //else if( Assoc_PFParticleShower->at(pfp.key()).size()==1  ){
 	 //theData.ShowerPrimaryDaughters.push_back(P);
 	 if(P.InNuSlice) theData.ShowerPrimaryDaughters.push_back(P);
 	 else theData.ShowerOthers.push_back(P);

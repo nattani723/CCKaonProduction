@@ -32,6 +32,7 @@ namespace cckaon {
     // Use for sample orthogonality
     bool EventHasKaonPScatter = false;
     bool EventHasProtonScatter = false;
+    bool EventHasPionScatter = false;
     bool EventHasHyperon = false;
     bool EventHasKaon = false;
     bool EventHasKaonP = false;
@@ -105,6 +106,7 @@ namespace cckaon {
     void GetHyperonDecay();
     bool FindKaonPScatter();
     bool FindProtonScatter();
+    bool FindPionScatter();
     int  GetOrigin(int trackid);
     void MCTruthMatch(SimParticle &P);
     void MCTruthMatch(SimParticle &P,int trackid);
@@ -138,6 +140,7 @@ namespace cckaon {
     
     double DecayProtonThresh = 0.0;
     double DecayPionThresh = 0.0;
+    double DecatMuonThresh = 0.0;
     
     G4Truth theTruth;
     

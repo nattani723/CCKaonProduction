@@ -67,7 +67,7 @@ cckaon::ScatterFilter::ScatterFilter(fhicl::ParameterSet const& p)
 {
 }
 
-bool hyperon::ScatterFilter::filter(art::Event& e)
+bool cckaon::ScatterFilter::filter(art::Event& e)
 {
    bool pass = true;
 
@@ -90,4 +90,4 @@ bool hyperon::ScatterFilter::filter(art::Event& e)
    return pass;
 }
 
-DEFINE_ART_MODULE(hyperon::ScatterFilter)
+DEFINE_ART_MODULE(cckaon::ScatterFilter)

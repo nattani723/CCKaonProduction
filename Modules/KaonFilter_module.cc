@@ -68,4 +68,4 @@ bool cckaon::KaonFilter::filter(art::Event& e)
       return EventHasKaon;
 }
 
-DEFINE_ART_MODULE(hyperon::KaonFilter)
+DEFINE_ART_MODULE(cckaon::KaonFilter)

@@ -112,7 +112,7 @@ namespace cckaon {
     void MCTruthMatch(SimParticle &P,int trackid);
     void SetFlags();
     
-    void SetDecayThresholds(double decayprotonthresh,double decaypionthresh);
+    void SetDecayThresholds(double decaymuonthresh,double decaypionthresh);
 
   private:
     
@@ -138,9 +138,8 @@ namespace cckaon {
     
     std::vector<int> GetChildIDs(const art::Ptr<simb::MCParticle> &g4p,bool IsNeutron=false);
     
-    double DecayProtonThresh = 0.0;
     double DecayPionThresh = 0.0;
-    double DecatMuonThresh = 0.0;
+    double DecayMuonThresh = 0.0;
     
     G4Truth theTruth;
     

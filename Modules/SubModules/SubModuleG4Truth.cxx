@@ -37,6 +37,7 @@ SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset,
          pset.get<std::string>("G4ModuleLabel","largeant"),
          particlegunmode)
 {
+  SetScatterThresholds(pset.get<double>("KaonScatterThresh",0.0),pset.get<double>("MuonScatterThresh",0.05),pset.get<double>("PionScatterThresh",0.0));
   SetDecayThresholds(pset.get<double>("DecayMuonThresh",0.0),pset.get<double>("DecayPionThresh",0.0));
 }
 
@@ -557,6 +558,17 @@ bool SubModuleG4Truth::FindPionScatter(){
    }
 
    return false;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleG4Truth::SetScatterThresholds(double kaonscatterthresh, double pionscatterthresh, double muonscatterthresh){
+
+  KaonScatterThresh = kaonscatterthresh;
+  MuonScatterThresh = muonscatterthresh;
+  PionScatterThresh = pionscatterthresh;
+
 }
 
 

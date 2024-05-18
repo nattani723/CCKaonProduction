@@ -112,6 +112,7 @@ namespace cckaon {
     void MCTruthMatch(SimParticle &P,int trackid);
     void SetFlags();
     
+    void SetScatterThresholds(double kaonscatterthresh, double pionscatterthresh,double muonscatterthresh);
     void SetDecayThresholds(double decaymuonthresh,double decaypionthresh);
 
   private:
@@ -137,7 +138,10 @@ namespace cckaon {
     std::map<int,art::Ptr<simb::MCParticle>> partByID;
     
     std::vector<int> GetChildIDs(const art::Ptr<simb::MCParticle> &g4p,bool IsNeutron=false);
-    
+   
+    double KaonScatterThresh = 0.0; 
+    double MuonScatterThresh = 0.0; 
+    double PionScatterThresh = 0.0; 
     double DecayPionThresh = 0.0;
     double DecayMuonThresh = 0.0;
     

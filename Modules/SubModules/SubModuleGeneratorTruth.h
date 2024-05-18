@@ -34,7 +34,8 @@ struct GeneratorTruth {
    std::vector<double> TruePrimaryVertex_Y;
    std::vector<double> TruePrimaryVertex_Z;
    std::vector<std::string> CCNC;
-   bool EventHasFinalStateNeutron=false;
+   bool EventHasFinalStateProton=false;
+   bool EventHasFinalStatePion=false;
    bool EventHasHyperon=false; 
    bool EventHasKaon=false; 
    bool EventHasKaonP=false; 

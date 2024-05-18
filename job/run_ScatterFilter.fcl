@@ -1,0 +1,33 @@
+#include "scatterFilterConfig.fcl"
+#include "services_microboone.fcl"
+
+process_name: ScatterFilter
+
+source:
+{
+module_type: RootInput
+maxEvents: -1
+}
+
+physics:
+{
+analyzers: { ScatterFilter: @local::filterEvents }
+
+ana : [ ScatterFilter ]
+stream:  [ out1 ]
+#trigger_paths: [ filter ]
+end_paths: [ stream ]
+
+}
+
+outputs:
+{
+out1:
+{
+module_type: RootOutput
+fileName: "%ifb_%tc_ScatterFilter.root"
+dataTier: "generated"
+compressionLevel: 1
+SelectEvents: [ filter ]
+}
+}

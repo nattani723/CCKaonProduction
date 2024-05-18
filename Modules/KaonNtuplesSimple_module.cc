@@ -136,7 +136,8 @@ private:
   std::vector<bool> t_IsSignal_NuMuP;
   std::vector<bool> t_IsSignal_PiPPi0;
 
-  bool t_EventHasFinalStateNeutron;
+  bool t_EventHasFinalStateProton;
+  bool t_EventHasFinalStatePion;
 
   std::vector<SimParticle> t_Neutrino;
   std::vector<SimParticle> t_Lepton;
@@ -273,7 +274,8 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
    t_CCNC.clear();
    t_NMCTruths = 0;
    t_NMCTruthsInTPC = 0;
-   t_EventHasFinalStateNeutron = false;
+   t_EventHasFinalStateProton = false;
+   t_EventHasFinalStatePion = false;
 
    t_InActiveTPC.clear();
    t_IsHyperon.clear();
@@ -377,7 +379,8 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       //t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
       //t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
 
-      t_EventHasFinalStateNeutron = GenT.EventHasFinalStateNeutron;
+      t_EventHasFinalStateProton = GenT.EventHasFinalStateProton;
+      t_EventHasFinalStatePion = GenT.EventHasFinalStatePion;
 
       delete Generator_SM;
    }

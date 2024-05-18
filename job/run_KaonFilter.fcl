@@ -1,0 +1,35 @@
+#include "kaonsimpleConfig.fcl"
+#include "services_microboone.fcl"
+
+process_name: KaonFilter
+
+source:
+{
+module_type: RootInput
+maxEvents: -1
+}
+
+physics:
+{
+analyzers: { KaonFilter: @local::analyseEvents }
+
+ana : [ KaonFilter ]
+stream:  [ out1 ]
+#trigger_paths: [ filter ]
+end_paths: [ stream ]
+
+}
+
+outputs:
+{
+out1:
+{
+module_type: RootOutput
+fileName: "%ifb_%tc_KaonFilter.root"
+dataTier: "generated"
+compressionLevel: 1
+SelectEvents: [ filter ]
+}
+}
+
+physics.analyzers.KaonFilter.module_type: KaonFilter

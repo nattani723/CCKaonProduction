@@ -21,6 +21,11 @@ analyseEvents:
 	Geant4: {
 	   GeneratorModuleLabel: "generator"
 	   G4ModuleLabel: "largeant"
+	   KaonScatterThresh: 0.0
+	   MuonScatterThresh: 0.1
+	   PionScatterThresh: 0.1
+	   DecayMuonThresh: 0.0
+	   DecayPionThresh: 0.0
 	}
 
 	# Reco submodule config

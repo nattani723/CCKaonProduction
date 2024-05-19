@@ -73,6 +73,7 @@ ParticleGunMode(particlegunmode)
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
+   Assoc_PFPMuon = new art::FindManyP<anab::T0>(Vect_PFParticle,e,"NuCCproducer");
    Assoc_PFParticleVertex = new art::FindManyP<recob::Vertex>(Vect_PFParticle,e,vertexlabel);    
    Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle,e,tracklabel);
    if(withrecoalg) Assoc_PFParticleTrackRebuilt = new art::FindManyP<recob::Track>(Vect_PFParticle,e,trackrebuiltlabel); 
@@ -128,12 +129,24 @@ void SubModuleReco::PrepareInfo(){
 
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
-   std::cout << "Vect_PFParticle.size(): " << Vect_PFParticle.size() << std::endl;
+   lar_pandora::PFParticleVector PFPMuon(0);
+
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
 
      if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
 
       RecoParticle P = MakeRecoParticle(pfp);
+
+     // look at particles with neutrino parent and one associated track
+     if (pfparticle->Parent()==pfnu->Self() && pfparticleTrackAssn.at(i).size()==1) {
+
+       art::Ptr<recob::Track> track = pfparticleTrackAssn.at(i).front();
+       // CC muon has a T0 associated
+       if (Assoc_PFPMuon.at(i).size()==1) {
+	 PFPMuon.push_back(pfp);
+	 P.IsCCMu = true;
+       }
+     }
       
       if(pfp->Parent() == neutrinoID){
          P.Parentage = 1;
@@ -141,15 +154,13 @@ void SubModuleReco::PrepareInfo(){
       }
       else{ 	      
 	if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){ // has daughter track
-         	P.Parentage = 2; 
-         	P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
+	  P.Parentage = 2; 
+	  P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
 	}
 	else P.Parentage = 3;
       }
 
       if(P.PDG == 13){ // This is Pandora PDG code (11 or 13)
-      //if( Assoc_PFParticleTrack->at(pfp.key()).size()==1 ){
-         //theData.TrackPrimaryDaughters.push_back(P);
 	 if(P.InNuSlice){
 	    theData.TrackPrimaryDaughters.push_back(P);
             m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
@@ -160,8 +171,6 @@ void SubModuleReco::PrepareInfo(){
 	 }
 	}
       else if(P.PDG == 11){
-      //else if( Assoc_PFParticleShower->at(pfp.key()).size()==1  ){
-	 //theData.ShowerPrimaryDaughters.push_back(P);
 	 if(P.InNuSlice) theData.ShowerPrimaryDaughters.push_back(P);
 	 else theData.ShowerOthers.push_back(P);
       }

@@ -21,12 +21,14 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/ParameterSetRegistry.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/FindMany.h"				
 
 #include "larcoreobj/SummaryData/POTSummary.h"
+#include "lardataobj/AnalysisBase/T0.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "larsim/EventWeight/Base/MCEventWeight.h"
 

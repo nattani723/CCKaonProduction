@@ -23,6 +23,7 @@
 #include "lardataobj/AnalysisBase/BackTrackerMatchingData.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
 #include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/T0.h"
 #include "larevt/SpaceChargeServices/SpaceChargeService.h"
 
 #include "ubana/CCKaonProduction/Headers/ParticleTypes.h"
@@ -115,6 +116,7 @@ class SubModuleReco {
 
       RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp);
 
+      art::FindManyP<anab::T0>* Assoc_PFPMuon;
       art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;  
       art::FindManyP<recob::Track>* Assoc_PFParticleTrack;
       art::FindManyP<recob::Track>* Assoc_PFParticleTrackRebuilt;

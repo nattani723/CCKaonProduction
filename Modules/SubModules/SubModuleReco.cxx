@@ -129,8 +129,8 @@ void SubModuleReco::PrepareInfo(){
 
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
-   lar_pandora::PFParticleVector PFPMuon(0);
-
+   int ipfp=0;
+      
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
 
      if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
@@ -138,15 +138,15 @@ void SubModuleReco::PrepareInfo(){
       RecoParticle P = MakeRecoParticle(pfp);
 
      // look at particles with neutrino parent and one associated track
-     if (pfparticle->Parent()==pfnu->Self() && pfparticleTrackAssn.at(i).size()==1) {
+     if (pfp->Parent() == neutrinoID && Assoc_PFParticleTrack->at(ipfp).size()==1) {
 
-       art::Ptr<recob::Track> track = pfparticleTrackAssn.at(i).front();
        // CC muon has a T0 associated
-       if (Assoc_PFPMuon.at(i).size()==1) {
-	 PFPMuon.push_back(pfp);
+       if (Assoc_PFPMuon->at(ipfp).size()==1) {
+	 //PFPMuon.push_back(pfp);
 	 P.IsCCMu = true;
        }
      }
+     ipfp++;
       
       if(pfp->Parent() == neutrinoID){
          P.Parentage = 1;

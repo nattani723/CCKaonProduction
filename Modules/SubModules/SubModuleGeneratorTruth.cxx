@@ -72,7 +72,7 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          //if(isKaonP(Part.PdgCode()) && Part.StatusCode() == 1 && ( mode == 1 || mode == 2) ) theTruth.Mode.back() = "KAONP";
 
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2212) theTruth.EventHasFinalStateProton = true;
-         if(Part.StatusCode() == 1 && (Part.PdgCode() == 221 || Part.PdgCode() == -221)) theTruth.EventHasFinalStatePion = true;
+         if(Part.StatusCode() == 1 && (Part.PdgCode() == 211 || Part.PdgCode() == -211)) theTruth.EventHasFinalStatePion = true;
          if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){
             theTruth.EventHasHyperon = true;
          }

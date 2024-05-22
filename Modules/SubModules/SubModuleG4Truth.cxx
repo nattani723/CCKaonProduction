@@ -534,7 +534,7 @@ bool SubModuleG4Truth::FindPionScatter(){
 
       art::Ptr<simb::MCParticle> part = partByID[Primary_IDs[i]];
 
-      if(part->PdgCode() != 221 || part->PdgCode() != -221) continue;
+      if(part->PdgCode() != 211 || part->PdgCode() != -211) continue;
 
       if( part->EndProcess() == "pi+Inelastic" || part->EndProcess() == "pi-Inelastic" ) Pion_IDs.push_back(part->TrackId()); 
 
@@ -548,10 +548,10 @@ bool SubModuleG4Truth::FindPionScatter(){
 
       for(size_t i_d=0;i_d<Pion_Inelastic_Daughter_IDs.size();i_d++){
 
-         // Look for protons
+         // Look for pions
          art::Ptr<simb::MCParticle> part2 = partByID[Pion_Inelastic_Daughter_IDs[i_d]];
          //double P = sqrt(part2->Px()*part2->Px() + part2->Py()*part2->Py() + part2->Pz()*part2->Pz());
-         if(part2->PdgCode() == 221 || part->PdgCode() == -221) nPions++; 
+         if(part2->PdgCode() == 211 || part->PdgCode() == -211) nPions++; 
       }
 
       if(nPions >= 1) return true;

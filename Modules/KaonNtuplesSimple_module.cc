@@ -232,7 +232,7 @@ private:
   bool f_ParticleGun = false;
   bool f_IsData;
   bool f_Debug = false;
-  bool f_WithRecoAlg = false;
+  bool f_WithRecoAlg = true;
   
 };
 

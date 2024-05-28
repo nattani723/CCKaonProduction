@@ -232,7 +232,7 @@ private:
   bool f_ParticleGun = false;
   bool f_IsData;
   bool f_Debug = false;
-  bool f_WithRecoAlg = true;
+  bool f_WithRecoAlg = false;
   
 };
 
@@ -253,7 +253,8 @@ cckaon::KaonNtuplesSimple::KaonNtuplesSimple(fhicl::ParameterSet const& p)
    f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
    f_ParticleGun(p.get<bool>("ParticleGun",false)),
    f_IsData(p.get<bool>("IsData")),
-  f_Debug(p.get<bool>("Debug",true))
+  f_Debug(p.get<bool>("Debug",true)),
+  f_WithRecoAlg(p.get<bool>("WithRecoAlg",false))
 {
   std::cout << "constructor called" << std::endl;
    if(f_WeightLabels.size()){

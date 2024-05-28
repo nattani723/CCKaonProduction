@@ -237,13 +237,13 @@ void PIDManager::Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticl
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v){
+PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscoresPID_v, std::vector<anab::sParticleIDAlgScores> algscoresCaliPID_v){
 
    PIDStore theStore;
    ThreePlaneMeandEdX(track,calo_v,theStore);
    LLRPID(calo_v,theStore);
-   BraggPID(track,algscores_v,theStore);
-   Chi2PID(track,algscores_v,theStore);
+   BraggPID(track,algscoresPID_v,theStore);
+   Chi2PID(track,algscoresCaliPID_v,theStore);
    return theStore;
 }
 

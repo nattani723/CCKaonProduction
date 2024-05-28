@@ -81,9 +81,9 @@ class SubModuleReco {
 
       //SubModuleReco();
   SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,string trackrebuiltlabel,
-		string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
+		string showerlabel,string vertexlabel, string pidlabel, string calipidlabel,string calolabel,string hitlabel,
 		string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,
-		string rerunpidlabel, string reruncalolabel, string showerhitassnlabel,string metadatalabel,string genlabel,
+		string rerunpidlabel, string reruncalipidlabel, string reruncalolabel, string showerhitassnlabel,string metadatalabel,string genlabel,
 		string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false, bool withrecoalg=false);
 
   SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false, bool withrecoalg=false);
@@ -130,8 +130,10 @@ class SubModuleReco {
       art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* ParticlesPerHit;
       art::FindManyP<anab::Calorimetry>* Assoc_TrackCalo;
       art::FindManyP<anab::ParticleID>* Assoc_TrackPID;
+      art::FindManyP<anab::ParticleID>* Assoc_TrackCaliPID;
       art::FindManyP<anab::Calorimetry>* Assoc_TrackRebuiltCalo;
       art::FindManyP<anab::ParticleID>* Assoc_TrackRebuiltPID;
+      art::FindManyP<anab::ParticleID>* Assoc_TrackRebuiltCaliPID;
 
       searchingfornues::LLRPID llr_pid_calculator;
       searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;

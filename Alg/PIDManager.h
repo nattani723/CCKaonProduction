@@ -82,7 +82,7 @@ namespace cckaon {
          void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
          void BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
          void Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store);
-         PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
+         PIDStore GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscoresPID_v, std::vector<anab::sParticleIDAlgScores> algscoresCaliPID_v);   
                
          double PlaneWeight(TVector3 dir,int i_pl);
          double PlaneWeight(art::Ptr<recob::Track> track,int i_pl);

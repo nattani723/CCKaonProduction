@@ -19,12 +19,14 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("ShowerModuleLabel"),
                   pset.get<std::string>("VertexModuleLabel"),
                   pset.get<std::string>("PIDModuleLabel"),
+                  pset.get<std::string>("CaliPIDModuleLabel"),
                   pset.get<std::string>("CaloModuleLabel"),
                   pset.get<std::string>("HitModuleLabel"),
                   pset.get<std::string>("HitTruthAssnLabel"),
                   pset.get<std::string>("TrackHitAssnLabel"),
 		  pset.get<std::string>("TrackRebuiltHitAssnLabel"),
 	          pset.get<std::string>("RerunPIDModuleLabel"),
+	          pset.get<std::string>("RerunCaliPIDModuleLabel"),
 	          pset.get<std::string>("RerunCaloModuleLabel"),
                   pset.get<std::string>("ShowerHitAssnLabel"),
                   pset.get<std::string>("MetadataModuleLabel"),
@@ -41,9 +43,9 @@ SubModuleReco(e,isdata,
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel, string trackrebuiltlabel,
-                                     string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
+			     string showerlabel,string vertexlabel,string pidlabel,string calipidlabel,string calolabel,string hitlabel,
 			     string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,
-			     string rerunpidlabel, string reruncalolabel, string showerhitassnlabel,string metadatalabel,string genlabel,
+			     string rerunpidlabel, string reruncalipidlabel,string reruncalolabel, string showerhitassnlabel,string metadatalabel,string genlabel,
 			     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode, bool withrecoalg) :
 PIDCalc(),
 DoGetPIDs(dogetpids),
@@ -92,6 +94,8 @@ ParticleGunMode(particlegunmode)
       if(withrecoalg) Assoc_TrackRebuiltCalo = new art::FindManyP<anab::Calorimetry>(Vect_TrackRebuilt,e,reruncalolabel);
       Assoc_TrackPID = new art::FindManyP<anab::ParticleID>(Vect_Track,e,pidlabel);
       if(withrecoalg) Assoc_TrackRebuiltPID = new art::FindManyP<anab::ParticleID>(Vect_TrackRebuilt,e,rerunpidlabel);
+      Assoc_TrackCaliPID = new art::FindManyP<anab::ParticleID>(Vect_Track,e,calipidlabel);
+      if(withrecoalg) Assoc_TrackRebuiltCaliPID = new art::FindManyP<anab::ParticleID>(Vect_TrackRebuilt,e,reruncalipidlabel);
    }
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
@@ -571,21 +575,23 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
   std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack;
   std::vector<art::Ptr<anab::ParticleID>> trackPID;
+  std::vector<art::Ptr<anab::ParticleID>> trackCaliPID;
 
    if(P.UseRebuilt==true){
 	caloFromTrack = Assoc_TrackRebuiltCalo->at(trk.key());
    	trackPID = Assoc_TrackRebuiltPID->at(trk.key());
-	std::cout << "caloFromTrack.size(): " << caloFromTrack.size() <<std::endl;
-	std::cout << "trackPID.size(): " << trackPID.size()<<std::endl;
+   	trackCaliPID = Assoc_TrackRebuiltCaliPID->at(trk.key());
    }
    else{
 	caloFromTrack = Assoc_TrackCalo->at(trk.key());
    	trackPID = Assoc_TrackPID->at(trk.key());
+   	trackCaliPID = Assoc_TrackCaliPID->at(trk.key());
    }
 
-   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
+   std::vector<anab::sParticleIDAlgScores> AlgScoresVecPID = trackPID.at(0)->ParticleIDAlgScores();
+   std::vector<anab::sParticleIDAlgScores> AlgScoresVecCaliPID = trackCaliPID.at(0)->ParticleIDAlgScores();
 
-   PIDStore store = PIDCalc.GetPIDs(trk,caloFromTrack,AlgScoresVec);
+   PIDStore store = PIDCalc.GetPIDs(trk,caloFromTrack,AlgScoresVecPID,AlgScoresVecCaliPID);
 
    P.Track_LLR_PID = store.LLR;
    P.Track_LLR_PID_Kaon = store.LLR_Kaon;

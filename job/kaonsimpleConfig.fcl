@@ -10,7 +10,7 @@ analyseEvents:
 	GetGeneratorInfo: true
 	GetG4Info: true
 	GetRecoInfo: true
-
+	WithRecoAlg: false
 
 	# GeneratorTruth submodule config
 	Generator: {
@@ -37,13 +37,15 @@ analyseEvents:
 	   TrackRebuiltModuleLabel: "CCKaonProducer"
 	   ShowerModuleLabel: "pandora"
 	   VertexModuleLabel: "pandora"
-	   PIDModuleLabel: "pandorapidSCE"
+	   PIDModuleLabel: "pandorapid"
+	   CaliPIDModuleLabel: "pandoracalipidSCE"
 	   CaloModuleLabel: "pandoracaliSCE"
 	   HitModuleLabel: "gaushit"
 	   HitTruthAssnLabel: "gaushitTruthMatch"
 	   TrackHitAssnLabel: "pandora" 
 	   TrackRebuiltHitAssnLabel: "CCKaonProducer"
-	   RerunPIDModuleLabel: "pandoraRebuildTrackCaliPidSCE"
+	   RerunPIDModuleLabel: "pandoraRebuildTrackPid"
+	   RerunCaliPIDModuleLabel: "pandoraRebuildTrackCaliPidSCE"
 	   RerunCaloModuleLabel: "pandoraRebuildTrackCaliSCE"
 	   ShowerHitAssnLabel: "pandora"
 	   MetadataModuleLabel: "pandora" 

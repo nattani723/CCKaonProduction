@@ -43,6 +43,8 @@ analyseEvents:
 	   HitTruthAssnLabel: "gaushitTruthMatch"
 	   TrackHitAssnLabel: "pandora" 
 	   TrackRebuiltHitAssnLabel: "CCKaonProducer"
+	   RerunPIDModuleLabel: "pandoraRebuildTrackCaliPidSCE"
+	   RerunCaloModuleLabel: "pandoraRebuildTrackCaliSCE"
 	   ShowerHitAssnLabel: "pandora"
 	   MetadataModuleLabel: "pandora" 
 	}

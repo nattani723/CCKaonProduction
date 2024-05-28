@@ -81,8 +81,9 @@ class SubModuleReco {
 
       //SubModuleReco();
   SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,string trackrebuiltlabel,
-                        string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-		string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,string showerhitassnlabel,string metadatalabel,string genlabel,
+		string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
+		string hittruthassnlabel,string trackhitassnlabel,string trackrebuilthitassnlabel,
+		string rerunpidlabel, string reruncalolabel, string showerhitassnlabel,string metadatalabel,string genlabel,
 		string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false, bool withrecoalg=false);
 
   SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false, bool withrecoalg=false);
@@ -119,7 +120,7 @@ class SubModuleReco {
       art::FindManyP<anab::T0>* Assoc_PFPMuon;
       art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;  
       art::FindManyP<recob::Track>* Assoc_PFParticleTrack;
-      art::FindManyP<recob::Track>* Assoc_PFParticleTrackRebuilt;
+      //art::FindManyP<recob::Track>* Assoc_PFParticleTrackRebuilt;
       art::FindManyP<recob::Shower>* Assoc_PFParticleShower;
       art::FindManyP<larpandoraobj::PFParticleMetadata>* Assoc_PFParticleMetadata;
       art::FindManyP<recob::Hit>* Assoc_TrackHit;
@@ -147,6 +148,7 @@ class SubModuleReco {
 
       void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void GetRebuiltTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P);

@@ -215,10 +215,18 @@ void PIDManager::Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticl
     if (algscore.fAlgName == "Chi2" && anab::kVariableType(algscore.fVariableType) == anab::kGOF) {
        for (int i_pl=0; i_pl<3; i_pl++) {
 	 if (UBPID::uB_getSinglePlane(algscore.fPlaneMask)==i_pl) {
-            if (algscore.fAssumedPdg==321)  store.Chi2_Kaon.at(i_pl) = algscore.fValue;
-            if (algscore.fAssumedPdg==2212) store.Chi2_Proton.at(i_pl) = algscore.fValue;
-            if (algscore.fAssumedPdg==211)  store.Chi2_Pion.at(i_pl) = algscore.fValue;
-            if (algscore.fAssumedPdg==13)   store.Chi2_Muon.at(i_pl) = algscore.fValue;
+
+	   /*
+	   store.Chi2_Kaon.at(i_pl) = -1;
+	   store.Chi2_Proton.at(i_pl) = -1;
+	   store.Chi2_Pion.at(i_pl) = -1;
+	   store.Chi2_Muon.at(i_pl) = -1;
+	   */
+
+	   if (algscore.fAssumedPdg==321)  store.Chi2_Kaon.at(i_pl) = algscore.fValue;
+	   if (algscore.fAssumedPdg==2212) store.Chi2_Proton.at(i_pl) = algscore.fValue;
+	   if (algscore.fAssumedPdg==211)  store.Chi2_Pion.at(i_pl) = algscore.fValue;
+	   if (algscore.fAssumedPdg==13)   store.Chi2_Muon.at(i_pl) = algscore.fValue;
 	 }
        }
     }

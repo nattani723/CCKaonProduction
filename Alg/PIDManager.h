@@ -45,15 +45,15 @@ namespace cckaon {
       double Bragg_Kaon_Plane2;    
       double Bragg_Kaon_3Plane;
 
-     std::vector<float> Chi2_Kaon;
-     std::vector<float> Chi2_Proton;
-     std::vector<float> Chi2_Pion;
-     std::vector<float> Chi2_Muon;
+     std::vector<float> Chi2_Kaon = {-1., -1., -1.};
+     std::vector<float> Chi2_Proton = {-1., -1., -1.};
+     std::vector<float> Chi2_Pion = {-1., -1., -1.};
+     std::vector<float> Chi2_Muon = {-1., -1., -1.};
 
-      double Chi2_Kaon_3Plane;
-      double Chi2_Proton_3Plane;
-      double Chi2_Pion_3Plane;
-      double Chi2_Muon_3Plane;
+      double Chi2_Kaon_3Plane = -1;
+      double Chi2_Proton_3Plane = -1;
+      double Chi2_Pion_3Plane = -1;
+      double Chi2_Muon_3Plane = -1;
 
       std::vector<float> dEdX_Plane0;
       std::vector<float> ResidualRange_Plane0;

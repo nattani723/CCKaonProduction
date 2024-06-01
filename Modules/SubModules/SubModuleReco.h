@@ -59,6 +59,7 @@ struct RecoData {
    std::vector<RecoParticle> TrackOthers;
    std::vector<RecoParticle> TrackRebuiltOthers;
    std::vector<RecoParticle> ShowerOthers;
+  RecoParticle CCMuTrack;
 
    std::vector<TVector3> TrackStarts;
 
@@ -116,6 +117,8 @@ class SubModuleReco {
       std::vector<art::Ptr<recob::Hit>> Vect_Hit;
 
       RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp);
+      RecoParticle MakeRecoParticle(const art::Ptr<recob::Track> &trk);
+      RecoParticle MakeRecoParticle(const art::Ptr<recob::Shower> &shw);
 
       art::FindManyP<anab::T0>* Assoc_PFPMuon;
       art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;  
@@ -150,6 +153,7 @@ class SubModuleReco {
 
       void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void GetTrackData(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetRebuiltTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);

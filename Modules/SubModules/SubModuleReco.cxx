@@ -137,6 +137,125 @@ void SubModuleReco::PrepareInfo(){
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
    int ipfp=0;
+   int itrk=0;
+   int ishw=0;
+   std::vector<art::Ptr<recob::PFParticle>> pfmuons(0); 
+   std::vector<int> reco_nu_daughters_id(0);
+   art::Ptr<recob::PFParticle> pfmuon;
+   art::Ptr<recob::Track> trkmuon;
+
+   // Find CC muon and daughters
+   for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
+     
+     //if((pfp->Parent() == neutrinoID && pfp->PdgCode()==13)
+     //m_PFPID_TrackIndex[pfp->Self()] = P.Index;
+
+     // look at particles with neutrino parent and one associated track 
+     if (pfp->Parent() == neutrinoID && Assoc_PFParticleTrack->at(ipfp).size()==1) {
+       
+       art::Ptr<recob::Track> track = Assoc_PFParticleTrack->at(ipfp).front(); 
+       reco_nu_daughters_id.push_back(track->ID());
+       //RecoParticle PDummy = MakeRecoParticle(pfp);
+       //m_PFPID_TrackIndex[pfp->Self()] = PDummy.Index; // store index for neutrino primary tracks   
+       
+       // CC muon has a T0 associated  
+       if (Assoc_PFPMuon->at(ipfp).size()==1){
+	 RecoParticle P = MakeRecoParticle(pfp);
+	 P.IsCCMu = true;
+	 pfmuons.push_back(pfp);
+	 theData.CCMuTrack = P;
+       }
+     }
+     ipfp++;
+   }
+
+   if(pfmuons.size()==1){
+     pfmuon = pfmuons.front(); 
+     trkmuon = Assoc_PFParticleTrack->at(pfmuon.key()).front(); 
+   }
+
+   for(const art::Ptr<recob::Track> &ptrk : Vect_Track){
+
+     const recob::Track& trk = *ptrk;
+     RecoParticle P = MakeRecoParticle(ptrk);
+
+     if(trkmuon)
+       if(trk.ID() == trkmuon->ID()) continue;
+     
+     if( std::find(reco_nu_daughters_id.begin(), reco_nu_daughters_id.end(), trk.ID()) != reco_nu_daughters_id.end() ){
+       P.Parentage = 1;
+       P.InNuSlice = true;       
+     }else{
+       P.Parentage = 2;
+     }
+     
+     /*
+     if(trk.ID() == reco_nu_daughters_id.at(itrk)){
+       P.Parentage = 1;
+       P.InNuSlice = true;
+     }
+     else{
+       //if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){
+	 if( std::find(reco_nu_daughters_id.begin(), reco_nu_daughters_id.end(), trk.ID() != reco_nu_daughters_id.end()){
+	 P.Parentage = 2; 
+	 //P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
+       
+	 //if(WithRecoAlgorithm && Vect_TrackRebuilt.size()>0) GetRebuiltTrackData(pfp,P);//override with rebuilt tracks, if any
+       }
+       else P.Parentage = 3;
+     }
+     */
+     
+
+     if(P.InNuSlice){
+       theData.TrackPrimaryDaughters.push_back(P);
+       //m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
+     }
+     else theData.TrackOthers.push_back(P);
+     /*
+     else{
+       if(P.UseRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
+       else theData.TrackOthers.push_back(P);
+     }
+     */
+        
+     itrk++;
+   }
+
+   if(WithRecoAlgorithm){
+     for(const art::Ptr<recob::Track> &ptrk : Vect_TrackRebuilt){
+
+       //rebuild tracks are all neutrino granddaughter
+       RecoParticle P = MakeRecoParticle(ptrk);
+
+       P.Parentage = 2;
+       P.UseRebuilt = true;
+
+       theData.TrackRebuiltOthers.push_back(P);
+     }
+   }
+
+   for(art::Ptr<recob::Shower> &pshw : Vect_Shower){
+
+     //const recob::Shower& shw = *pshw;
+     RecoParticle P = MakeRecoParticle(pshw);
+
+     if(P.InNuSlice) theData.ShowerPrimaryDaughters.push_back(P);
+     else theData.ShowerOthers.push_back(P);
+
+     ishw++;
+   }
+
+   /*
+   for(art::Ptr<recob::PFParticle> &trk : Vect_Track){
+     std::cout << "this is loop over Vect_Track" << std::endl;
+     RecoParticle PD;
+     GetPIDs(trk,PD);
+   }
+   */
+
+   /*
+   int ipfp=0;
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
 
@@ -146,7 +265,7 @@ void SubModuleReco::PrepareInfo(){
 
      // look at particles with neutrino parent and one associated track
      if (pfp->Parent() == neutrinoID && Assoc_PFParticleTrack->at(ipfp).size()==1) {
-       
+         
        // CC muon has a T0 associated
        if (Assoc_PFPMuon->at(ipfp).size()==1) {
 	 //PFPMuon.push_back(pfp);
@@ -154,6 +273,9 @@ void SubModuleReco::PrepareInfo(){
        }
      }
      ipfp++;
+  
+
+
       
      if(pfp->Parent() == neutrinoID){
        P.Parentage = 1;
@@ -183,6 +305,7 @@ void SubModuleReco::PrepareInfo(){
        else theData.ShowerOthers.push_back(P);
      }
    }
+*/
 
    theData.NPrimaryDaughters = theData.TrackPrimaryDaughters.size() + theData.ShowerPrimaryDaughters.size();
    theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
@@ -259,6 +382,41 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::Track> &trk){
+
+   RecoParticle P;
+
+   P.PDG = 13;
+   GetTrackData(trk,P);
+
+   //this is same calculation as GetVertexData(pfp,P);
+   const recob::Track& track = *trk;
+   TVector3 vtx(track.Vertex().X(), track.Vertex().Y(), track.Vertex().Z());
+   P.SetVertex(vtx);
+   P.Displacement = (vtx-theData.RecoPrimaryVertex).Mag();
+
+   return P;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::Shower> &shw){
+
+   RecoParticle P;
+
+   P.PDG = 11;
+
+   //this is same calculation as GetVertexData(pfp,P);
+   //const recob::Shower& shower = shw;
+   //TVector3 vtx(shower.Vertex().X(), shower.Vertex().Y(), shower.Vertex().Z());
+   //P.SetVertex(vtx);
+   //P.Displacement = (vtx-theData.RecoPrimaryVertex).Mag();
+
+   return P;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
    std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> pfpMeta = Assoc_PFParticleMetadata->at(pfp.key());
@@ -292,6 +450,26 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
   
    if(pfpTracks.size() != 1) return;
 
+   // Sets track length/position related variables
+   SetTrackVariables(P,trk);
+
+   if(!IsData) TruthMatch(trk,P);
+
+   if(DoGetPIDs) GetPIDs(trk,P);
+   
+   theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
+   P.Index = theData.TrackStarts.size() - 1;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleReco::GetTrackData(const art::Ptr<recob::Track> &trk,RecoParticle &P){
+
+  std::vector<art::Ptr<recob::Hit>> hits;
+  
+  hits = Assoc_TrackHit->at(trk.key());
+  if(WithRecoAlgorithm) hits = Assoc_TrackRebuiltHit->at(trk.key());
+  
    // Sets track length/position related variables
    SetTrackVariables(P,trk);
 

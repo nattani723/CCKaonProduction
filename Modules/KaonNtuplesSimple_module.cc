@@ -181,6 +181,7 @@ private:
   std::vector<RecoParticle> t_TrackOthers;
   std::vector<RecoParticle> t_TrackRebuiltOthers;
   std::vector<RecoParticle> t_ShowerOthers;
+  RecoParticle t_CCMuTrack;
   
   TVector3 t_RecoPrimaryVertex;
   
@@ -489,6 +490,7 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_TrackOthers = RecoD.TrackOthers;
       t_TrackRebuiltOthers = RecoD.TrackRebuiltOthers;
       t_ShowerOthers = RecoD.ShowerOthers;
+      t_CCMuTrack = RecoD.CCMuTrack;
       t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
       t_GoodReco = RecoD.GoodReco;
       t_GoodReco_NuMuP = RecoD.GoodReco_NuMuP;
@@ -711,6 +713,7 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("TrackOthers","vector<RecoParticle>",&t_TrackOthers);
    OutputTree->Branch("TrackRebuiltOthers","vector<RecoParticle>",&t_TrackRebuiltOthers);
    OutputTree->Branch("ShowerOthers","vector<RecoParticle>",&t_ShowerOthers);
+   OutputTree->Branch("CCMuTrack","RecoParticle",&t_CCMuTrack);
    
    //OutputTree->Branch("SysDials",&t_SysDials);
    //OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);

@@ -11,9 +11,9 @@ maxEvents: -1
 
 physics:
 {
-analyzers: { KaonFilter: @local::analyseEvents }
+filters: { KaonFilter: @local::analyseEvents }
 
-ana : [ KaonFilter ]
+filter : [ KaonFilter ]
 stream:  [ out1 ]
 #trigger_paths: [ filter ]
 end_paths: [ stream ]
@@ -32,4 +32,4 @@ SelectEvents: [ filter ]
 }
 }
 
-physics.analyzers.KaonFilter.module_type: KaonFilter
+physics.filters.KaonFilter.module_type: KaonFilter

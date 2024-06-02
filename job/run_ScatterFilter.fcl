@@ -11,11 +11,11 @@ maxEvents: -1
 
 physics:
 {
-analyzers: { ScatterFilter: @local::filterEvents }
+filters: { ScatterFilter: @local::filterEvents }
 
-ana : [ ScatterFilter ]
+filter : [ ScatterFilter ]
 stream:  [ out1 ]
-#trigger_paths: [ filter ]
+trigger_paths: [ filter ]
 end_paths: [ stream ]
 
 }
@@ -31,3 +31,4 @@ compressionLevel: 1
 SelectEvents: [ filter ]
 }
 }
+

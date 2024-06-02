@@ -53,6 +53,7 @@ class cckaon::ScatterFilter : public art::EDFilter {
       fhicl::ParameterSet f_Generator;
       fhicl::ParameterSet f_G4;
 
+      bool f_ParticleGun = false;
       bool f_Debug = false;
 };
 
@@ -73,7 +74,7 @@ bool cckaon::ScatterFilter::filter(art::Event& e)
 
    if(f_GetGeneratorInfo){
       if(f_Debug) std::cout << "Getting EG Info" << std::endl;
-      SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator);
+      SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator,f_ParticleGun);
       GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
       pass = (GenT.EventHasFinalStateProton || GenT.EventHasFinalStatePion || GenT.EventHasKaon);
       delete Generator_SM;
@@ -81,7 +82,7 @@ bool cckaon::ScatterFilter::filter(art::Event& e)
 
    if(f_GetG4Info){
       if(f_Debug) std::cout << "Getting G4 Info" << std::endl;
-      SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
+      SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4,f_ParticleGun);
       G4Truth G4T = G4_SM->GetG4Info();
       pass = (G4T.EventHasProtonScatter || G4T.EventHasPionScatter || G4T.EventHasKaonPScatter);
       delete G4_SM;

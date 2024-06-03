@@ -50,12 +50,14 @@ inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk){
 
    geo::Point_t point = {trk->Start().X(),trk->Start().Y(),trk->Start().Z()};
    geo::Vector_t sce_corr = SCE->GetPosOffsets(point);
-   TVector3 Start(trk->Start().X()+sce_corr.X(),trk->Start().Y()-sce_corr.Y(),trk->Start().Z()-sce_corr.Z());
+   TVector3 Start(trk->Start().X(), trk->Start().Y(), trk->Start().Z());
+   TVector3 StartCorr(trk->Start().X()+sce_corr.X(),trk->Start().Y()-sce_corr.Y(),trk->Start().Z()-sce_corr.Z());
    point = {trk->End().X(),trk->End().Y(),trk->End().Z()};
    sce_corr = SCE->GetPosOffsets(point);
-   TVector3 End(trk->End().X()+sce_corr.X(),trk->End().Y()-sce_corr.Y(),trk->End().Z()-sce_corr.Z());
+   TVector3 End(trk->End().X(), trk->End().Y(), trk->End().Z());
+   TVector3 EndCorr(trk->End().X()+sce_corr.X(),trk->End().Y()-sce_corr.Y(),trk->End().Z()-sce_corr.Z());
 
-   P.SetTrackPositions(Start,End);
+   P.SetTrackPositions(Start,StartCorr,End,EndCorr);
 
    P.TrackWiggliness = GetTrackWiggliness(trk);
 }

@@ -32,3 +32,4 @@ SelectEvents: [ filter ]
 }
 }
 
+physics.filters.ScatterFilter.module_type: ScatterFilter

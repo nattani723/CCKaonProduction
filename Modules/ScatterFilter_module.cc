@@ -46,7 +46,6 @@ class cckaon::ScatterFilter : public art::EDFilter {
 
    private:
 
-
       bool f_GetGeneratorInfo;
       bool f_GetG4Info;
 
@@ -70,7 +69,7 @@ cckaon::ScatterFilter::ScatterFilter(fhicl::ParameterSet const& p)
 
 bool cckaon::ScatterFilter::filter(art::Event& e)
 {
-   bool pass = true;
+   bool pass = false;
 
    if(f_GetGeneratorInfo){
       if(f_Debug) std::cout << "Getting EG Info" << std::endl;

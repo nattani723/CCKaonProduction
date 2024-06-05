@@ -208,17 +208,14 @@ void PIDManager::Chi2PID(art::Ptr<recob::Track> track,std::vector<anab::sParticl
   store.Chi2_Proton.resize(num_plane);
   store.Chi2_Pion.resize(num_plane);
   store.Chi2_Muon.resize(num_plane);
-  
+
   for(size_t i_algscore=0;i_algscore<algscores_v.size();i_algscore++){
      anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
 
     if (algscore.fAlgName == "Chi2" && anab::kVariableType(algscore.fVariableType) == anab::kGOF) {
        for (int i_pl=0; i_pl<3; i_pl++) {
 	 if (UBPID::uB_getSinglePlane(algscore.fPlaneMask)==i_pl) {
-	   if (algscore.fAssumedPdg==321){
-	     if(i_pl==2) std::cout << "kaon chi2 on collection plane " << algscore.fValue <<std::endl;
-	     store.Chi2_Kaon.at(i_pl) = algscore.fValue;
-	   }
+	   if (algscore.fAssumedPdg==321) store.Chi2_Kaon.at(i_pl) = algscore.fValue;
 	   if (algscore.fAssumedPdg==2212) store.Chi2_Proton.at(i_pl) = algscore.fValue;
 	   if (algscore.fAssumedPdg==211)  store.Chi2_Pion.at(i_pl) = algscore.fValue;
 	   if (algscore.fAssumedPdg==13)   store.Chi2_Muon.at(i_pl) = algscore.fValue;

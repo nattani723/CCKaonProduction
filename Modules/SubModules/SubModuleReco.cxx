@@ -184,7 +184,7 @@ void SubModuleReco::PrepareInfo(){
      
      if( std::find(reco_nu_daughters_id.begin(), reco_nu_daughters_id.end(), trk.ID()) != reco_nu_daughters_id.end() ){
        P.Parentage = 1;
-       P.InNuSlice = true;       
+       P.InNuSlice = true;
      }else{
        P.Parentage = 2;
      }

@@ -455,6 +455,8 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
 
    if(!IsData) TruthMatch(trk,P);
 
+   if(!IsData) MergeCheck(hits,P);
+
    if(DoGetPIDs) GetPIDs(trk,P);
    
    theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
@@ -474,6 +476,8 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::Track> &trk,RecoParticle 
    SetTrackVariables(P,trk);
 
    if(!IsData) TruthMatch(trk,P);
+
+   if(!IsData) MergeCheck(hits,P);
 
    if(DoGetPIDs) GetPIDs(trk,P);
    
@@ -575,7 +579,7 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
    //if(!IsData) TruthMatch(trk,P);
 
    std::vector<art::Ptr<recob::Hit>> hits = Assoc_ShowerHit->at(shw.key());
-   //if(!IsData && WithRecoAlgorithm) MergeCheck(hits,P);
+   if(!IsData) MergeCheck(hits,P);
 
    //if(DoGetPIDs) GetPIDs(trk,P);
    
@@ -648,8 +652,8 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P){
 
+void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P){
 
   std::map<int, double> trkide;
   std::map<int, double> trkidhit;
@@ -657,12 +661,10 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
   std::map<int, int> trkidmrgid;
   std::map<int, int> trkidmother;
 
-  std::map<int, double> pdge;
-  std::map<int, double> pdghit;
-
   std::vector<simb::MCParticle const*> particle_vec;
   std::vector<anab::BackTrackerHitMatchingData const*> match_vec;
   double totalenergy = 0;
+  int totalhits = 0;
 
    for(size_t i_hit=0;i_hit<hits.size();++i_hit){
 
@@ -676,28 +678,27 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
          trkide[trackID] += match_vec[i_p]->energy;
          totalenergy += match_vec[i_p]->energy;
          trkidhit[trackID]++;
+	 totalhits++;
          trkidpdg[trackID] = particle_vec[i_p]->PdgCode();
          trkidmrgid[trackID] = -9;
          trkidmother[trackID] = particle_vec[i_p]->Mother();
-        
+
       }
    }
-
 
    // Generate merged IDs for related tracks
   int currentMergedID = 1;
   for (auto& pdg_entry : trkidpdg) {
+
     if (trkidmrgid[pdg_entry.first] != -9) continue;
     trkidmrgid[pdg_entry.first] = currentMergedID;
     int currentMotherTrackID = trkidmother[pdg_entry.first];
 
-    //while (currentMotherTrackId > 0 && trkidpdg.find(currentMotherTrackId) != trkidpdg.end() && trkidpdg[currentMotherTrackId] == pdg_entry.second) {
     while (currentMotherTrackID > 0) {
-      if( trkidpdg.find(currentMotherTrackID) != trkidpdg.end() &&
-	  trkidpdg[currentMotherTrackID] == pdg_entry.second ){
-	trkidmrgid[currentMotherTrackID] = currentMergedID;
-	currentMotherTrackID = trkidmother[currentMotherTrackID];
-      }
+      if(trkidpdg.find(currentMotherTrackID) == trkidpdg.end()) break;
+      if(trkidpdg[currentMotherTrackID] != pdg_entry.second) break;
+      trkidmrgid[currentMotherTrackID] = currentMergedID;
+      currentMotherTrackID = trkidmother[currentMotherTrackID];
     }
     ++currentMergedID;
   }
@@ -709,38 +710,33 @@ void SubModuleReco::MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, Re
       trkide[mrgid1.first] += trkide[mrgid2.first];
       trkidhit[mrgid1.first] += trkidhit[mrgid2.first];
       trkidmrgid[mrgid2.first] = -1;  // Mark as merged
-      //trkide[mrgid2.first] = -1;
-      //trkidhit[mrgid2.first] = -1;
     }
   }
 
   // Prepare data for output
-  for (auto const& ide : trkide) {
-    if (trkidmrgid[ide.first] == -1) continue;
-    pdge[ trkidpdg[ide.first] ] = ide.second;
-    pdghit[ trkidpdg[ide.first] ] = trkidhit[ide.first];
+  std::vector<std::pair<int, double>> energySorted, hitsSorted;
+  for (auto const& entry : trkide) {
+    if (trkidmrgid[entry.first] != -1) {
+      energySorted.emplace_back(trkidpdg[entry.first], entry.second);
+      hitsSorted.emplace_back(trkidpdg[entry.first], trkidhit[entry.first]);
+    }
   }
- 
-  // Output data
-  std::vector<std::pair<int, double>> vec_pdge(pdge.begin(), pdge.end());
-  std::vector<std::pair<int, double>> vec_pdghit(pdghit.begin(), pdghit.end());
-  
-  std::sort(vec_pdge.begin(), vec_pdge.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-      return a.second > b.second;  // Descending order
-    });
-  
-  std::sort(vec_pdghit.begin(), vec_pdghit.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-      return a.second > b.second;  // Descending order
-    });
-  
-  std::vector<int> MergePDG(3);
-  std::vector<double> MergeEnergyPurity(3);
-  std::vector<double> MergeHitPurity(3);
 
-  for(int it = 0; it < 3; it++) {
-    MergePDG[it] = vec_pdge[it].first;
-    MergeEnergyPurity[it] = vec_pdge[it].second / totalenergy;
-    MergeHitPurity[it] = vec_pdghit[it].second / hits.size();
+  std::sort(energySorted.begin(), energySorted.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+      return a.second > b.second;  // Descending order by energy
+    });
+
+  std::sort(hitsSorted.begin(), hitsSorted.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+      return a.second > b.second;  // Descending order by hits
+    });
+
+  std::vector<int> MergePDG(3, -1);
+  std::vector<double> MergeEnergyPurity(3, 0.0), MergeHitPurity(3, 0.0);
+ 
+  for (size_t i = 0; i < 3 && i < energySorted.size(); ++i) {
+    MergePDG[i] = energySorted[i].first;
+    MergeEnergyPurity[i] = energySorted[i].second / totalenergy;
+    MergeHitPurity[i] = hitsSorted[i].second / totalhits;
   }
 
   P.SetMergeCheck(MergePDG, MergeEnergyPurity, MergeHitPurity);

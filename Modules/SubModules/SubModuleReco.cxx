@@ -405,11 +405,12 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::Shower> &shw)
    RecoParticle P;
 
    P.PDG = 11;
+   GetShowerData(shw,P);
 
    //this is same calculation as GetVertexData(pfp,P);
-   //const recob::Shower& shower = shw;
-   //TVector3 vtx(shower.Vertex().X(), shower.Vertex().Y(), shower.Vertex().Z());
-   //P.SetVertex(vtx);
+   const recob::Shower& shower = *shw;
+   TVector3 vtx(shower.ShowerStart().X(), shower.ShowerStart().Y(), shower.ShowerStart().Z());
+   P.SetVertex(vtx);
    //P.Displacement = (vtx-theData.RecoPrimaryVertex).Mag();
 
    return P;
@@ -585,6 +586,18 @@ void SubModuleReco::GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoPar
    
    //theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
    //P.Index = theData.TrackStarts.size() - 1;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleReco::GetShowerData(const art::Ptr<recob::Shower> &shw,RecoParticle &P){
+
+  std::vector<art::Ptr<recob::Hit>> hits;
+
+  hits = Assoc_ShowerHit->at(shw.key());
+
+  if(!IsData) MergeCheck(hits,P);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

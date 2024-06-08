@@ -156,6 +156,7 @@ class SubModuleReco {
       void GetTrackData(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void GetRebuiltTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
       void GetShowerData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void GetShowerData(const art::Ptr<recob::Shower> &shw,RecoParticle &P);
       void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
       void MergeCheck(const std::vector<art::Ptr<recob::Hit>>& hits, RecoParticle &P);
       void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);

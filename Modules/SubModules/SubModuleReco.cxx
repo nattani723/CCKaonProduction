@@ -62,8 +62,9 @@ ParticleGunMode(particlegunmode)
       throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
 
    if(withrecoalg){
+     std::cout << "withrecoalg is true" << std::endl;
      if(!e.getByLabel(trackrebuiltlabel,Handle_TrackRebuilt)) 
-       throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
+       std::cout << "No Rebuilt Track Data Products Found!" << std::endl;
    }
 
    if(!e.getByLabel(showerlabel,Handle_Shower)) 
@@ -74,7 +75,9 @@ ParticleGunMode(particlegunmode)
 
    art::fill_ptr_vector(Vect_PFParticle,Handle_PFParticle);
    art::fill_ptr_vector(Vect_Track,Handle_Track);
-   if(withrecoalg) art::fill_ptr_vector(Vect_TrackRebuilt,Handle_TrackRebuilt);
+   if(withrecoalg){
+     if(e.getByLabel(trackrebuiltlabel,Handle_TrackRebuilt)) art::fill_ptr_vector(Vect_TrackRebuilt,Handle_TrackRebuilt);
+   }
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
@@ -178,6 +181,7 @@ void SubModuleReco::PrepareInfo(){
 
      const recob::Track& trk = *ptrk;
      RecoParticle P = MakeRecoParticle(ptrk);
+     GetTrackData(ptrk,P);
 
      if(trkmuon)
        if(trk.ID() == trkmuon->ID()) continue;
@@ -189,40 +193,18 @@ void SubModuleReco::PrepareInfo(){
        P.Parentage = 2;
      }
      
-     /*
-     if(trk.ID() == reco_nu_daughters_id.at(itrk)){
-       P.Parentage = 1;
-       P.InNuSlice = true;
-     }
-     else{
-       //if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){
-	 if( std::find(reco_nu_daughters_id.begin(), reco_nu_daughters_id.end(), trk.ID() != reco_nu_daughters_id.end()){
-	 P.Parentage = 2; 
-	 //P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
-       
-	 //if(WithRecoAlgorithm && Vect_TrackRebuilt.size()>0) GetRebuiltTrackData(pfp,P);//override with rebuilt tracks, if any
-       }
-       else P.Parentage = 3;
-     }
-     */
-     
 
      if(P.InNuSlice){
        theData.TrackPrimaryDaughters.push_back(P);
        //m_PFPID_TrackIndex[pfp->Self()] = P.Index; // store index for neutrino primary tracks
      }
      else theData.TrackOthers.push_back(P);
-     /*
-     else{
-       if(P.UseRebuilt==true) theData.TrackRebuiltOthers.push_back(P);
-       else theData.TrackOthers.push_back(P);
-     }
-     */
         
      itrk++;
    }
 
-   if(WithRecoAlgorithm){
+   if(this->WithRecoAlgorithm){
+
      for(const art::Ptr<recob::Track> &ptrk : Vect_TrackRebuilt){
 
        //rebuild tracks are all neutrino granddaughter
@@ -231,7 +213,9 @@ void SubModuleReco::PrepareInfo(){
        P.Parentage = 2;
        P.UseRebuilt = true;
 
+       GetTrackData(ptrk,P);
        theData.TrackRebuiltOthers.push_back(P);
+
      }
    }
 
@@ -311,7 +295,7 @@ void SubModuleReco::PrepareInfo(){
    theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
    theData.NPrimaryShowerDaughters = theData.ShowerPrimaryDaughters.size();
    theData.NOtherTracks = theData.TrackOthers.size();
-   theData.NOtherRebuiltTracks = theData.TrackRebuiltOthers.size();
+   if(WithRecoAlgorithm) theData.NOtherRebuiltTracks = theData.TrackRebuiltOthers.size();
    theData.NOtherShowers = theData.ShowerOthers.size();
 
 }
@@ -387,7 +371,7 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::Track> &trk){
    RecoParticle P;
 
    P.PDG = 13;
-   GetTrackData(trk,P);
+   //GetTrackData(trk,P);
 
    //this is same calculation as GetVertexData(pfp,P);
    const recob::Track& track = *trk;
@@ -471,7 +455,7 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::Track> &trk,RecoParticle 
   std::vector<art::Ptr<recob::Hit>> hits;
   
   hits = Assoc_TrackHit->at(trk.key());
-  if(WithRecoAlgorithm) hits = Assoc_TrackRebuiltHit->at(trk.key());
+  if(P.UseRebuilt==true) hits = Assoc_TrackRebuiltHit->at(trk.key());
   
    // Sets track length/position related variables
    SetTrackVariables(P,trk);
@@ -805,104 +789,6 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
    P.Track_Chi2_Muon_Plane2 = store.Chi2_Muon.at(2);
    P.Track_Chi2_Muon_3Plane = store.Chi2_Muon_3Plane;
 
-/*
-   // LLR PID Calculation
-
-   double this_llr_pid=0;
-   double this_llr_pid_score=0;
-   double this_llr_pid_kaon=0;
-   double this_llr_pid_score_kaon=0;
-   
-   double this_llr_pid_kaon_partial = 0;
-   double this_llr_pid_score_kaon_partial = 0;
-
-   for(auto const &calo : caloFromTrack){
-
-      auto const &plane = calo->PlaneID().Plane;
-      auto const &dedx_values = calo->dEdx();
-      auto const &rr = calo->ResidualRange();
-      auto const &pitch = calo->TrkPitchVec();
-      std::vector<std::vector<float>> par_values;
-      par_values.push_back(rr);
-      par_values.push_back(pitch);
-
-      // Get parital length PIDs
-      std::vector<std::vector<float>> par_values_partial;
-      std::vector<float> dedx_values_partial,rr_partial,pitch_partial;      
-      if(calo->dEdx().size() != calo->ResidualRange().size() || calo->ResidualRange().size() != calo->TrkPitchVec().size())
-         throw cet::exception("SubModuleReco") << "Track calo point list size mismatch" << std::endl;
-      for(size_t i_p=0;i_p<calo->dEdx().size();i_p++){
-         if(rr.at(i_p) > ResRangeCutoff) continue;
-         dedx_values_partial.push_back(calo->dEdx().at(i_p));
-         rr_partial.push_back(calo->ResidualRange().at(i_p));
-         pitch_partial.push_back(calo->TrkPitchVec().at(i_p));        
-      }
-      par_values_partial.push_back(rr_partial);
-      par_values_partial.push_back(pitch_partial);
-  
-      if(calo->ResidualRange().size() == 0) continue;
-
-      float calo_energy = 0;
-      for(size_t i=0;i<dedx_values.size();i++)
-         calo_energy += dedx_values[i] * pitch[i];
-
-      float llr_pid = llr_pid_calculator.LLR_many_hits_one_plane(dedx_values,par_values,plane);
-      float llr_pid_kaon = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values,par_values,plane);
-      this_llr_pid += llr_pid;
-      this_llr_pid_kaon += llr_pid_kaon;
-
-     // Partial length calculation
-     float calo_energy_partial = 0;
-      for(size_t i=0;i<dedx_values_partial.size();i++)
-         calo_energy_partial += dedx_values_partial[i] * pitch_partial[i];
-
-      float llr_pid_kaon_partial = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values_partial,par_values_partial,plane);
-      this_llr_pid_kaon_partial += llr_pid_kaon_partial;     
-   }
-
-   this_llr_pid_score = atan(this_llr_pid/100.)*2/3.14159266;
-   this_llr_pid_score_kaon = atan(this_llr_pid_kaon/100.)*2/3.14159266;
-   this_llr_pid_score_kaon_partial = atan(this_llr_pid_kaon_partial/100.)*2/3.14159266;
-
-   P.Track_LLR_PID = this_llr_pid_score;
-   P.Track_LLR_PID_Kaon = this_llr_pid_score_kaon;
-   P.Track_LLR_PID_Kaon_Partial = this_llr_pid_score_kaon_partial;
-   */
-
-
-/*
-   // LLR PID Scores Calculation
-   LLRPID_Result LLPIDs = LLRPIDCalc.GetScores(caloFromTrack);
-   P.Track_LLR_PID = LLPIDs.Score;
-   P.Track_LLR_PID_Kaon = LLPIDs.Score_Kaon;
-   P.Track_LLR_PID_Kaon_Partial = LLPIDs.Score_Kaon_Partial;
-
-   // Mean dE/dX Calculation
-   dEdXStore dEdXs = dEdXCalc.ThreePlaneMeandEdX(trk,caloFromTrack);
-   P.MeandEdX_Plane0 = dEdXs.Plane0;
-   P.MeandEdX_Plane1 = dEdXs.Plane1;
-   P.MeandEdX_Plane2 = dEdXs.Plane2;
-   P.MeandEdX_ThreePlane = dEdXs.ThreePlaneAverage;
-*/
-
-
-/*
-   // 3 Plane Proton PID (Pip Hamilton)
-   std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
-
-   std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
-
-   for(size_t i_algscore=0;i_algscore<AlgScoresVec.size();i_algscore++){
-
-      anab::sParticleIDAlgScores AlgScore = AlgScoresVec.at(i_algscore);
-
-      if(TMath::Abs(AlgScore.fAssumedPdg) == 2212 && AlgScore.fAlgName=="ThreePlaneProtonPID" && anab::kVariableType(AlgScore.fVariableType) == anab::kLikelihood && anab::kTrackDir(AlgScore.fTrackDir) == anab::kForward)
-         P.TrackPID = std::log(AlgScore.fValue);
-
-      if(TMath::Abs(AlgScore.fAssumedPdg) == 321) std::cout << AlgScore.fAlgName << std::endl;
-
-   }
-*/
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

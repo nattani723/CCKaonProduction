@@ -482,7 +482,7 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
       t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
       t_NOtherTracks = RecoD.NOtherTracks;
-      t_NOtherRebuiltTracks = RecoD.NOtherTracks;
+      t_NOtherRebuiltTracks = RecoD.NOtherRebuiltTracks;
       t_NOtherShowers = RecoD.NOtherShowers;
   
       t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;

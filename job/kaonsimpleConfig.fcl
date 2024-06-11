@@ -10,7 +10,7 @@ analyseEvents:
 	GetGeneratorInfo: true
 	GetG4Info: true
 	GetRecoInfo: true
-	WithRecoAlg: false
+	WithRecoAlg: true
 
 	# GeneratorTruth submodule config
 	Generator: {

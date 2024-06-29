@@ -32,8 +32,8 @@ struct GeneratorTruth {
    std::vector<std::string> Mode;
    std::vector<SimParticle> Neutrino;
    std::vector<int> NuPDG;
-   std::vector<double> NuE;
-   std::vector<double> NuL;
+   std::vector<float> NuE;
+   std::vector<float> NuL;
    std::vector<double> TruePrimaryVertex_X;
    std::vector<double> TruePrimaryVertex_Y;
    std::vector<double> TruePrimaryVertex_Z;

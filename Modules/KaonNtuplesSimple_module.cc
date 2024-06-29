@@ -101,6 +101,12 @@ private:
   
   std::vector<std::string> t_Mode;
   std::vector<std::string> t_CCNC;
+  std::vector<int> t_NuPDG;
+  std::vector<float> t_NuE;
+  std::vector<float> t_NuL;
+  std::vector<double> t_TrueDecayPosition_X;
+  std::vector<double> t_TrueDecayPosition_Y;
+  std::vector<double> t_TrueDecayPosition_Z;
   
   // Flags applying to the entire event
   bool t_EventHasKaonPScatter;
@@ -282,6 +288,12 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
    //t_Mode = "NONE";
    t_Mode.clear();
    t_CCNC.clear();
+   t_NuPDG.clear();
+   t_NuE.clear();
+   t_NuL.clear();
+   t_TrueDecayPosition_X.clear();
+   t_TrueDecayPosition_Y.clear();
+   t_TrueDecayPosition_Z.clear();
    t_NMCTruths = 0;
    t_NMCTruthsInTPC = 0;
    t_EventHasFinalStateProton = false;
@@ -390,6 +402,14 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
       t_NMCTruths = GenT.NMCTruths;
       t_NMCTruthsInTPC = GenT.NMCTruthsInTPC;
       t_Neutrino = GenT.Neutrino;
+
+      t_NuPDG = GenT.NuPDG;
+      t_NuE = GenT.NuE;
+      t_NuL = GenT.NuL;
+      t_TrueDecayPosition_X = GenT.TrueDecayPosition_X;
+      t_TrueDecayPosition_Y = GenT.TrueDecayPosition_Y;
+      t_TrueDecayPosition_Z = GenT.TrueDecayPosition_Z;
+
       //t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
       //t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
       //t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
@@ -685,6 +705,12 @@ void cckaon::KaonNtuplesSimple::beginJob(){
    OutputTree->Branch("Weight",&t_Weight);
    OutputTree->Branch("Mode","vector<string>",&t_Mode);
    OutputTree->Branch("CCNC","vector<string>",&t_CCNC);
+   OutputTree->Branch("NuPDG","vector<int>",&t_NuPDG);
+   OutputTree->Branch("NuE","vector<float>",&t_NuE);
+   OutputTree->Branch("NuL","vector<float>",&t_NuL);
+   OutputTree->Branch("TrueDecayPosition_X","vector<double>",&t_TrueDecayPosition_X);
+   OutputTree->Branch("TrueDecayPosition_Y","vector<double>",&t_TrueDecayPosition_Y);
+   OutputTree->Branch("TrueDecayPosition_Z","vector<double>",&t_TrueDecayPosition_Z);
    OutputTree->Branch("NMCTruths",&t_NMCTruths);
    OutputTree->Branch("NMCTruthsInTPC",&t_NMCTruthsInTPC);
    OutputTree->Branch("InActiveTPC","vector<bool>",&t_InActiveTPC);

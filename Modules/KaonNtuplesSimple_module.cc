@@ -193,6 +193,12 @@ private:
   
   std::vector<std::string> t_SysDials;
   std::vector<std::vector<double>> t_SysWeights;
+
+  float t_PPFX_CV;
+  std::map<std::string, std::vector<double>> t_MapWeight;
+  std::vector<unsigned short> t_WeightsPPFX;
+  std::vector<double> t_WeightsPPFXD;
+
   
   /////////////////////////
   // Metadata for sample //
@@ -357,6 +363,11 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
    t_SysDials.clear();
    t_SysWeights.clear();
 
+   t_PPFX_CV=-1;
+   t_MapWeight.clear();
+   t_WeightsPPFX.clear();
+   t_WeightsPPFXD.clear();
+
    // General Event Info
 
    t_EventID = e.id().event();
@@ -517,6 +528,11 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
 
       std::vector<std::map<std::string,std::vector<double>>> theweightmap(t_NMCTruths); 
 
+      t_WeightsPPFX  = std::vector<unsigned short>(600,1);
+      t_WeightsPPFXD = std::vector<double>(600,1.0);
+
+      int PPFXCounter = 0;
+
       for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
 
          std::cout << "Getting new weight products with label " << f_WeightLabels.at(i_w) << std::endl;
@@ -542,6 +558,33 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
             std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(i_tr)->fWeight;
             std::map<std::string,std::vector<double>>::iterator it;
 
+	    //storing PPFX weights
+	    if(i_tr==0){
+
+	      if(theWeights.find("ppfx_cv_UBPPFXCV") != theWeights.end()) t_PPFX_CV = theWeights.find("ppfx_cv_UBPPFXCV")->second[0];
+	      std::cout << "t_PPFX_CV: " << t_PPFX_CV << std::endl;
+
+	      for(it = theWeights.begin();it != theWeights.end();it++){
+
+		std::string keyname = it->first;
+		
+		if(keyname.find("ppfx_ms_UBPPFX") != std::string::npos){
+
+		  std::cout << " [ EventWeightTree ]" << " Entering PPFX variation number " << PPFXCounter << " " <<keyname << std::endl;
+
+		  for(unsigned int i = 0; i < it->second.size(); ++i) {
+		    if ( (i + (100 * PPFXCounter) ) < t_WeightsPPFXD.size()) 
+		      t_WeightsPPFXD[i + (100 * PPFXCounter) ] *= it->second[i];
+		  }
+
+		  PPFXCounter += 1;
+
+		}
+
+	      }
+
+	    }
+
             for(it = theWeights.begin();it != theWeights.end();it++){
 
                if(it->first ==  "empty") continue;
@@ -562,6 +605,9 @@ void cckaon::KaonNtuplesSimple::analyze(art::Event const& e)
             }
          } // i_tr
       }
+
+      // store PPFX map
+      t_MapWeight.insert( std::pair<std::string,std::vector<double> >("ppfx_all",t_WeightsPPFXD) );
 
       // Organise the weights
       if(theweightmap.size()){
@@ -720,6 +766,10 @@ void cckaon::KaonNtuplesSimple::beginJob(){
 
    OutputTree->Branch("SysDials",&t_SysDials);
    OutputTree->Branch("SysWeights","vector<vector<double>>",&t_SysWeights);
+
+   OutputTree->Branch("PPFX_CV",&t_PPFX_CV,"PPFX_CV/F");
+   OutputTree->Branch("Weights","std::map<std::string, std::vector<double>>",&t_MapWeight);
+   OutputTree->Branch("WeightsPPFX", "std::vector<unsigned short>", &t_WeightsPPFX);
 
    //////////////////////////////////////////
    //             Metadata Tree	           //

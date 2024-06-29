@@ -13,6 +13,7 @@
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCFlux.h"
 #include "nusimdata/SimulationBase/MCNeutrino.h"
 #include "cetlib_except/exception.h"
 
@@ -33,6 +34,9 @@ struct GeneratorTruth {
    std::vector<double> TruePrimaryVertex_X;
    std::vector<double> TruePrimaryVertex_Y;
    std::vector<double> TruePrimaryVertex_Z;
+   std::vector<double> TrueDecayPosition_X;
+   std::vector<double> TrueDecayPosition_Y;
+   std::vector<double> TrueDecayPosition_Z;
    std::vector<std::string> CCNC;
    bool EventHasFinalStateProton=false;
    bool EventHasFinalStatePion=false;
@@ -55,6 +59,8 @@ private:
 
    art::Handle<std::vector<simb::MCTruth>> Handle_MCTruth;
    std::vector<art::Ptr<simb::MCTruth>> Vect_MCTruth;
+   art::Handle<std::vector<simb::MCFlux>> Handle_MCFlux;
+   std::vector<art::Ptr<simb::MCFlux>> Vect_MCFlux;
    GeneratorTruth theTruth;
 
    std::vector<int> KaonPDGs = {321,311,310,130};

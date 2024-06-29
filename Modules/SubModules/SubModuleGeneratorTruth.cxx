@@ -16,6 +16,11 @@ ParticleGunMode(particlegunmode)
 
    art::fill_ptr_vector(Vect_MCTruth,Handle_MCTruth);  
 
+   if(!e.getByLabel(pset.get<std::string>("FluxModuleLabel","generator"),Handle_MCFlux))  
+      throw cet::exception("SubModuleGeneratorTruth") << "No MC Truth data product!" << std::endl;
+
+   art::fill_ptr_vector(Vect_MCFlux,Handle_MCFlux);  
+
    HyperonPDGs = pset.get<std::vector<int>>("HyperonPDGs",{3122,3212,3112,3222});
     
 }
@@ -32,6 +37,12 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
    theTruth.NMCTruths = Vect_MCTruth.size();
 
    int i_truth=0;
+
+   for(const art::Ptr<simb::MCFlux> &theMCFlux : Vect_MCFlux){ 
+     theTruth.TrueDecayPosition_X.push_back(theMCFlux->fvx);
+     theTruth.TrueDecayPosition_Y.push_back(theMCFlux->fvy);
+     theTruth.TrueDecayPosition_Z.push_back(theMCFlux->fvz);
+   }
 
    for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){
 

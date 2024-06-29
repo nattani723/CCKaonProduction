@@ -31,6 +31,9 @@ struct GeneratorTruth {
    int NMCTruthsInTPC = 0;
    std::vector<std::string> Mode;
    std::vector<SimParticle> Neutrino;
+   std::vector<int> NuPDG;
+   std::vector<double> NuE;
+   std::vector<double> NuL;
    std::vector<double> TruePrimaryVertex_X;
    std::vector<double> TruePrimaryVertex_Y;
    std::vector<double> TruePrimaryVertex_Z;

@@ -42,6 +42,7 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
      theTruth.TrueDecayPosition_X.push_back(theMCFlux->fvx);
      theTruth.TrueDecayPosition_Y.push_back(theMCFlux->fvy);
      theTruth.TrueDecayPosition_Z.push_back(theMCFlux->fvz);
+     theTruth.NuL.push_back(theMCFlux->fdk2gen + theMCFlux->fgen2vtx);
    }
 
    for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){
@@ -53,6 +54,9 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
 
       if(ccnc == 0) theTruth.CCNC.push_back("CC");
       else theTruth.CCNC.push_back("NC");
+
+      theTruth.NuPDG.push_back(Nu.Nu().PdgCode());
+      theTruth.NuE.push_back(Nu.Nu().Trajectory().E(0));
 
       if(mode == 0) theTruth.Mode.push_back("QEL");
       else if(mode == 1) theTruth.Mode.push_back("RES");
